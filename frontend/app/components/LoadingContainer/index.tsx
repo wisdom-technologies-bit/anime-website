@@ -1,7 +1,7 @@
 import React from "react";
 import LoadingSvg from "@/public/assets/Eclipse-1s-200px.svg";
 import Image from "next/image";
-import Logo from "@/public/logo.png";
+const logo = "/logo-mark.svg";
 import styles from "./component.module.css";
 
 function LoadingPageContainer() {
@@ -9,7 +9,7 @@ function LoadingPageContainer() {
     <div id={styles.container}>
       <div id={styles.content_container}>
         <div id={styles.img_container}>
-          <Image fill alt="Logo" src={Logo} />
+          <Image fill alt="KumoriTV logo" src={logo} />
         </div>
 
         <LoadingSvg width={64} height={82} alt="Loading" />

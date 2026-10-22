@@ -16,7 +16,7 @@ import KeepWatchingSection from "./components/HomePage/KeepWatchingSection";
 import PopularMediaSection from "./components/HomePage/PopularMediaSection";
 
 export const metadata: Metadata = {
-  title: "Home | AniProject",
+  title: "Home | KumoriTV",
   description:
     "A anime platform that showcases popular and trending animes, mangas and movies. Explore the latest releases, keep watching your favorites, and discover what's popular in the anime world.",
   keywords: [

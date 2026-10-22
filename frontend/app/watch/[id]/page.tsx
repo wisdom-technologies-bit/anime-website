@@ -46,16 +46,16 @@ export async function generateMetadata({
   let pageTitle = "";
 
   if (mediaInfo.format == "MOVIE") {
-    pageTitle = `Watch ${mediaInfo.title.userPreferred} | AniProject`;
+    pageTitle = `Watch ${mediaInfo.title.userPreferred} | KumoriTV`;
   } else {
     // ACTES AS DEFAULT VALUE FOR PAGE PROPS
     if (Object.keys(searchParams).length === 0) searchParams = { episode: "1" };
 
-    pageTitle = `Episode ${searchParams.episode} - ${mediaInfo.title.userPreferred} | AniProject`;
+    pageTitle = `Episode ${searchParams.episode} - ${mediaInfo.title.userPreferred} | KumoriTV`;
   }
 
   return {
-    title: mediaInfo ? pageTitle : "Error | AniProject",
+    title: mediaInfo ? pageTitle : "Error | KumoriTV",
     description: !mediaInfo
       ? ""
       : `Watch ${mediaInfo.title.userPreferred}${

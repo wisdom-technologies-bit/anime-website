@@ -1,6 +1,5 @@
 import React from "react";
 import styles from "./headerComponent.module.css";
-import Image from "next/image";
 import ChevronDownIcon from "@/public/assets/chevron-down.svg";
 import Link from "next/link";
 import AnimeNavListHover from "./components/AnimeNavListHover";
@@ -23,13 +22,15 @@ function Header() {
           <MenuList />
 
           <Link href="/" id={styles.img_container}>
-            <Image
-              id={styles.logo}
-              src={"/logo.png"}
-              alt="AniProject Website Logo"
-              fill
-              sizes="110px"
-            />
+            <picture>
+              <source media="(max-width: 575px)" srcSet="/logo-mark.svg" />
+              <img
+                id={styles.logo}
+                src="/logo.svg"
+                alt="KumoriTV logo"
+                className={styles.logo_image}
+              />
+            </picture>
           </Link>
         </div>
 

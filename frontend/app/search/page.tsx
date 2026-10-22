@@ -8,7 +8,7 @@ import { Metadata } from "next";
 import { animeDatabaseSearchMedias } from "../api/search/anime-database/search";
 
 export const metadata: Metadata = {
-  title: "Search | AniProject",
+  title: "Search | KumoriTV",
   description:
     "Filter animes released on that year, or just discover a new one in a genre you didnt watched yet.",
 };

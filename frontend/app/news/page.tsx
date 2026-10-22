@@ -12,7 +12,7 @@ import NewsCard from "./components/NewsCard";
 export const revalidate = 1800; // revalidate cached data every 30 min
 
 export const metadata: Metadata = {
-  title: "News | AniProject",
+  title: "News | KumoriTV",
   description:
     "See the latest news about a variety of animes, mangas and movies.",
 };
