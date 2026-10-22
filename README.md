@@ -1,14 +1,14 @@
-<h1 align="center">AniProject</h1>
+<h1 align="center">KumoriTV</h1>
 
-![AniProject Website Logo](https://user-images.githubusercontent.com/69987890/177884319-0678f842-f3ca-4f62-8d31-7638ca954057.png)
+![KumoriTV Website Logo](https://user-images.githubusercontent.com/69987890/177884319-0678f842-f3ca-4f62-8d31-7638ca954057.png)
 
 Project of animes and mangas website, utilizing the AniList, Consumet and Aniwatch API, which has info of animes and mangas released, data of the cast of that media, and many other things.
 
 <p align="center">You can access this website on:
 
-<a href='https://aniproject-dev.vercel.app/'>AniProject on Vercel</a> </br>
+<a href='https://aniproject-dev.vercel.app/'>KumoriTV on Vercel</a> </br>
 or </br>
-<a href='https://aniproject-website.onrender.com'>AniProject on Render</a></br>
+<a href='https://aniproject-website.onrender.com'>KumoriTV on Render</a></br>
 If the Vercel one is blocked by payment, try this one (it takes up to 2 minutes to deploy and load due to cold boot).
 
 </p>

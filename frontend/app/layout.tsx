@@ -17,7 +17,10 @@ export const viewport: Viewport = {
 };
 
 export const metadata: Metadata = {
-  title: "KumoriTV",
+  title: {
+    default: "KumoriTV",
+    template: "%s | KumoriTV",
+  },
   description: "Watch anime on KumoriTV.",
   manifest: "/manifest.webmanifest",
   icons: {

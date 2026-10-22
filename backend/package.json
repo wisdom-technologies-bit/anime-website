@@ -1,5 +1,5 @@
 {
-  "name": "aniproject-server",
+  "name": "kumoritv-server",
   "version": "1.0.0",
   "description": "Server to help manage caching and data storing",
   "main": "server.js",
