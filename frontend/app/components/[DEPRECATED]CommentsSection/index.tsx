@@ -13,7 +13,7 @@ import {
   query,
 } from "firebase/firestore";
 import { initFirebase } from "@/app/firebaseApp";
-import { getAuth } from "firebase/auth";
+import { getFirebaseAuth, getFirebaseDb } from "@/app/firebaseApp";
 import { useAuthState } from "react-firebase-hooks/auth";
 import {
   MediaData,
@@ -48,11 +48,11 @@ export default function CommentsSection({
   const anilistUser = useAppSelector((state) => state.UserInfo.value);
   const dispatch = useAppDispatch();
 
-  const auth = getAuth();
+  const auth = getFirebaseAuth();
 
   const [user] = useAuthState(auth);
 
-  const db = getFirestore(initFirebase());
+  const db = getFirebaseDb();
 
   useEffect(() => {
     getCommentsForCurrMedia();

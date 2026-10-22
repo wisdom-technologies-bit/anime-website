@@ -11,7 +11,7 @@ import {
 } from "@/app/ts/interfaces/anilistMediaData";
 import anilist from "@/app/api/anilist/anilistMedias";
 import { useAuthState } from "react-firebase-hooks/auth";
-import { getAuth } from "firebase/auth";
+import { getFirebaseAuth } from "@/app/firebaseApp";
 import { getUserAdultContentPreference } from "@/app/lib/user/userDocFetchOptions";
 
 export const revalidate = 1800; // revalidate the data every 30 min
@@ -33,7 +33,7 @@ function NewestMediaSection({
     boolean | null
   >(null);
 
-  const auth = getAuth();
+  const auth = getFirebaseAuth();
   const [user] = useAuthState(auth);
 
   useEffect(() => {

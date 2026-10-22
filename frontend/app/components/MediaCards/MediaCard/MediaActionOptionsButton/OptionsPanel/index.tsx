@@ -7,7 +7,7 @@ import {
   removeMediaOnListByStatus,
   updateUserMediaListByStatus,
 } from "@/app/lib/user/userDocUpdateOptions";
-import { getAuth } from "firebase/auth";
+import { getFirebaseAuth, getFirebaseDb } from "@/app/firebaseApp";
 import { getFirestore, getDoc, doc } from "firebase/firestore";
 import { useAuthState } from "react-firebase-hooks/auth";
 import FavouriteSvgFill from "@/public/assets/heart-fill.svg";
@@ -64,11 +64,11 @@ export default function OptionsPanel({
 
   const anilistUser = useAppSelector((state) => state.UserInfo.value);
 
-  const auth = getAuth();
+  const auth = getFirebaseAuth();
 
   const [user] = useAuthState(auth);
 
-  const db = getFirestore(initFirebase());
+  const db = getFirebaseDb();
 
   useEffect(() => {
     if (!mediaInfo.mediaListEntry?.status && user) {

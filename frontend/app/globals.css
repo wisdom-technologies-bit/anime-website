@@ -26,7 +26,11 @@
 
   /* colors */
   /* --background: #181818; */
-  --background: #030f16;
+  --background: #0B0B14;
+  --midnight: #0B0B14;
+  --kumori-violet: #7C5CFF;
+  --sakura-pink: #FF5FA2;
+  --kumori-gradient: linear-gradient(135deg, #7C5CFF, #FF5FA2);
 
   --white-100: #fff;
   --white-75: rgba(255, 255, 255, 0.75);
@@ -42,7 +46,7 @@
 
   --error: #f44336;
 
-  --brand-color: #ff1a75;
+  --brand-color: var(--kumori-violet);
   --brand-dark-color: #3b0018;
 
   --pink-variant-1: #ff5ebc;
@@ -136,6 +140,14 @@ input:-webkit-autofill:active {
 button {
   cursor: pointer;
 }
+
+button[type="submit"],
+button.primary,
+.primary,
+[data-active="true"] {
+  background: var(--kumori-gradient);
+}
+
 
 li {
   list-style-type: none;

@@ -1,9 +1,13 @@
 footer#footer {
-
     background-color: var(--background);
 
     margin: auto;
 
+}
+
+footer#footer .logo {
+    object-fit: contain;
+    margin-bottom: 16px;
 }
 
 @media((min-width: 576px) and (max-width: 768px)) {

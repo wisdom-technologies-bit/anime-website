@@ -9,7 +9,7 @@ import { checkDeviceIsMobile } from "../lib/checkMobileOrDesktop";
 
 export async function generateMetadata() {
   return {
-    title: `My Lists | AniProject`,
+    title: `My Lists | KumoriTV`,
     description: `User's Medias Lists of Medias Watched, Planned to Watch and much more.`,
   };
 }

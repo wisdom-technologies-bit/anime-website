@@ -24,7 +24,7 @@ export async function generateMetadata({ params }: { params: { id: number } }) {
   });
 
   return {
-    title: `${mediaData.title.romaji || mediaData.title.native} | AniProject`,
+    title: `${mediaData.title.romaji || mediaData.title.native} | KumoriTV`,
     description:
       mediaData.description ||
       `See more info about ${mediaData.title.romaji || mediaData.title.native}`,

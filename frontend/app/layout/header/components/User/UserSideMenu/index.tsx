@@ -9,7 +9,7 @@ import SettingsSvg from "@/public/assets/gear-fill.svg";
 import StarListSvg from "@/public/assets/list-stars.svg";
 import FavouriteSvg from "@/public/assets/heart.svg";
 import LoadingSvg from "@/public/assets/Eclipse-1s-200px.svg";
-import { getAuth } from "firebase/auth";
+import { getFirebaseAuth } from "@/app/firebaseApp";
 import { useAuthState } from "react-firebase-hooks/auth";
 import Image from "next/image";
 import Link from "next/link";
@@ -58,7 +58,7 @@ function UserSideMenu() {
 
   const pathname = usePathname();
 
-  const auth = getAuth();
+  const auth = getFirebaseAuth();
   const [user, loading] = useAuthState(auth);
 
   useEffect(() => {

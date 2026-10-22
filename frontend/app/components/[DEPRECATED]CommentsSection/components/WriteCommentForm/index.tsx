@@ -4,7 +4,7 @@ import {
   MediaData,
   MediaDataFullInfo,
 } from "@/app/ts/interfaces/anilistMediaData";
-import { getAuth } from "firebase/auth";
+import { getFirebaseAuth, getFirebaseDb } from "@/app/firebaseApp";
 import { FormEvent, useState } from "react";
 import { useAuthState } from "react-firebase-hooks/auth";
 import Image from "next/image";
@@ -58,11 +58,11 @@ export default function WriteCommentFormContainer({
 
   const anilistUser = useAppSelector((state) => state.UserInfo.value);
 
-  const auth = getAuth();
+  const auth = getFirebaseAuth();
 
   const [user] = useAuthState(auth);
 
-  const db = getFirestore(initFirebase());
+  const db = getFirebaseDb();
 
   function isCommentTextValid(text: string) {
     if (text == "" || text.length > inputCharLimit) return false;

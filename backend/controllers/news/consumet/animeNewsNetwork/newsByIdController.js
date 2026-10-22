@@ -3,7 +3,10 @@ const setRedisKey = require("../../../redisUtils").setRedisKey;
 
 exports.getNewsByIdOnAnimeNewsNetwork = expressAsyncHandler(async (req, res) => {
 
-    const CONSUMET_NEWS_URI = process.env.CONSUMET_API_URL + `/news/ann/info?id=${req.query.id}`
+    const consumetApiUrl = process.env.CONSUMET_API_URL;
+    if (!consumetApiUrl) return res.status(200).json({ message: "News unavailable", result: null });
+
+    const CONSUMET_NEWS_URI = consumetApiUrl + `/news/ann/info?id=${req.query.id}`;
 
     const redisClient = req.redisClient;
 

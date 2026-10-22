@@ -1,4 +1,4 @@
-import type { Metadata } from "next";
+import type { Metadata, Viewport } from "next";
 import { Inter } from "next/font/google";
 import "./globals.css";
 import Header from "./layout/header";
@@ -12,11 +12,30 @@ import GoogleAnalytics from "./googleAnalytics";
 
 const inter = Inter({ subsets: ["latin"] });
 
+export const viewport: Viewport = {
+  themeColor: "#0B0B14",
+};
+
 export const metadata: Metadata = {
-  title: "AniProject",
-  description:
-    "A anime platform that showcases popular and trending animes, mangas and movies. Explore the latest releases, keep watching your favorites, and discover what's popular in the anime world.",
-  manifest: "/manifest.json",
+  title: "KumoriTV",
+  description: "Watch anime on KumoriTV.",
+  manifest: "/manifest.webmanifest",
+  icons: {
+    icon: "/favicon.svg",
+    apple: "/apple-touch-icon.png",
+  },
+  openGraph: {
+    title: "KumoriTV",
+    description: "Watch anime on KumoriTV.",
+    images: ["/og-image.png"],
+  },
+  twitter: {
+    card: "summary_large_image",
+    title: "KumoriTV",
+    description: "Watch anime on KumoriTV.",
+    images: ["/og-image.png"],
+  },
+  other: { "theme-color": "#0B0B14" },
 };
 
 export default function RootLayout({

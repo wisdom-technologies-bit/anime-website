@@ -12,7 +12,7 @@ import NewsCard from "./components/NewsCard";
 export const revalidate = 1800; // revalidate cached data every 30 min
 
 export const metadata: Metadata = {
-  title: "News | AniProject",
+  title: "News | KumoriTV",
   description:
     "See the latest news about a variety of animes, mangas and movies.",
 };
@@ -26,6 +26,15 @@ async function NewsHomePage() {
   const industryNewsList = (await newsApi.getNews({
     topic: "industry",
   })) as News[];
+
+  if (!recentNewsList.length) {
+    return (
+      <main id={styles.container}>
+        <h1>News is coming soon</h1>
+        <p>We&apos;ll have the latest anime news here shortly.</p>
+      </main>
+    );
+  }
 
   return (
     recentNewsList &&

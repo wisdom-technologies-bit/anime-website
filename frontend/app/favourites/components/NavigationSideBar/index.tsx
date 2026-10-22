@@ -2,7 +2,7 @@
 import Link from "next/link";
 import React, { useLayoutEffect, useState } from "react";
 import styles from "./component.module.css";
-import { getAuth } from "firebase/auth";
+import { getFirebaseAuth, getFirebaseDb } from "@/app/firebaseApp";
 import { useAuthState } from "react-firebase-hooks/auth";
 import { doc, getDoc, getFirestore } from "firebase/firestore";
 import { initFirebase } from "@/app/firebaseApp";
@@ -16,10 +16,10 @@ function NavigationSideBar({ params }: { params?: { format: string } }) {
 
   const anilistUser = useAppSelector((state) => state.UserInfo.value);
 
-  const auth = getAuth();
+  const auth = getFirebaseAuth();
   const [user, loading] = useAuthState(auth);
 
-  const db = getFirestore(initFirebase());
+  const db = getFirebaseDb();
 
   useLayoutEffect(() => {
     if (!loading && (user || anilistUser)) getUserBookmarks();

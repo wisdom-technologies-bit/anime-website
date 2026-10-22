@@ -11,7 +11,7 @@ import { SourceType } from "@/app/ts/interfaces/episodesSource";
 import { doc, getDoc, getFirestore } from "firebase/firestore";
 import { initFirebase } from "@/app/firebaseApp";
 import { useAuthState } from "react-firebase-hooks/auth";
-import { getAuth } from "firebase/auth";
+import { getFirebaseAuth, getFirebaseDb } from "@/app/firebaseApp";
 import { convertFromUnix } from "@/app/lib/formatDateUnix";
 import { useSearchParams } from "next/navigation";
 import { useAppSelector } from "@/app/lib/redux/hooks";
@@ -45,10 +45,10 @@ export default function EpisodesListContainer({
 
   const anilistUser = useAppSelector((state) => state.UserInfo.value);
 
-  const auth = getAuth();
+  const auth = getFirebaseAuth();
   const [user] = useAuthState(auth);
 
-  const db = getFirestore(initFirebase());
+  const db = getFirebaseDb();
 
   const searchParams = useSearchParams();
 

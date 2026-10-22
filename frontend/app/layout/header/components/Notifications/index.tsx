@@ -2,7 +2,7 @@
 import React, { useEffect, useState } from "react";
 import BellFillSvg from "@/public/assets/bell-fill.svg";
 import BellSvg from "@/public/assets/bell.svg";
-import { getAuth } from "firebase/auth";
+import { getFirebaseAuth, getFirebaseDb } from "@/app/firebaseApp";
 import { useAuthState } from "react-firebase-hooks/auth";
 import {
   arrayRemove,
@@ -51,9 +51,9 @@ function NotificationsContainer() {
 
   const anilistUser = useAppSelector((state) => state.UserInfo?.value);
 
-  const auth = getAuth();
+  const auth = getFirebaseAuth();
   const [user] = useAuthState(auth);
-  const db = getFirestore(initFirebase());
+  const db = getFirebaseDb();
 
   useEffect(() => {
     if (

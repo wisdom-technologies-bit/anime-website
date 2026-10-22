@@ -20,7 +20,7 @@ import {
   getDocs,
 } from "firebase/firestore";
 import { initFirebase } from "@/app/firebaseApp";
-import { getAuth } from "firebase/auth";
+import { getFirebaseAuth, getFirebaseDb } from "@/app/firebaseApp";
 import {
   MediaData,
   MediaDataFullInfo,
@@ -42,11 +42,11 @@ function AddToNotificationsButton({
   const anilistUser = useAppSelector((state) => state.UserInfo.value);
   const dispatch = useAppDispatch();
 
-  const auth = getAuth();
+  const auth = getFirebaseAuth();
 
   const [user, loading] = useAuthState(auth);
 
-  const db = getFirestore(initFirebase());
+  const db = getFirebaseDb();
 
   useEffect(() => {
     if (!loading) {

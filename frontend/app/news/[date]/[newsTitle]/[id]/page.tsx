@@ -10,7 +10,7 @@ export async function generateMetadata({ params }: { params: { id: string } }) {
   const newsInfo = (await news.getNewsInfo({ id: params.id })) as NewsArcticle;
 
   return {
-    title: `${newsInfo ? newsInfo.title : "Error"} | AniProject`,
+    title: `${newsInfo ? newsInfo.title : "Error"} | KumoriTV`,
     description: newsInfo.intro,
   };
 }

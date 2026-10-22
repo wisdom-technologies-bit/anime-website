@@ -107,7 +107,7 @@ function UserSettingsModal({
     null
   );
 
-  const db = getFirestore(initFirebase());
+  const db = getFirebaseDb();
 
   async function handleUpdateUserInfoForm(
     e: React.FormEvent<HTMLFormElement> | HTMLFormElement

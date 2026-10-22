@@ -19,7 +19,7 @@ import parse from "html-react-parser";
 import ScoreRating from "../../DynamicAssets/ScoreRating";
 import MediaFormatIcon from "../../DynamicAssets/MediaFormatIcon";
 import { useAuthState } from "react-firebase-hooks/auth";
-import { getAuth } from "firebase/auth";
+import { getFirebaseAuth } from "@/app/firebaseApp";
 import SwiperCarousel from "./swiperCarousel";
 import { SwiperSlide } from "swiper/react";
 import { convertToUnix } from "@/app/lib/formatDateUnix";
@@ -80,7 +80,7 @@ function NavigationThroughMedias({
     else fetchMediaList();
   }, []);
 
-  const auth = getAuth();
+  const auth = getFirebaseAuth();
   const [user] = useAuthState(auth);
 
   async function getUserPreference() {

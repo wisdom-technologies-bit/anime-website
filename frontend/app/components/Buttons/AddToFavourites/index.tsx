@@ -6,7 +6,7 @@ import FavouriteSvg from "@/public/assets/heart.svg";
 import FavouriteFillSvg from "@/public/assets/heart-fill.svg";
 import { getFirestore, doc, getDoc } from "firebase/firestore";
 import { initFirebase } from "@/app/firebaseApp";
-import { getAuth } from "firebase/auth";
+import { getFirebaseAuth, getFirebaseDb } from "@/app/firebaseApp";
 import { MediaData } from "@/app/ts/interfaces/anilistMediaData";
 import { useAuthState } from "react-firebase-hooks/auth";
 import { motion } from "framer-motion";
@@ -39,11 +39,11 @@ export function Button({
 
   const dispatch = useAppDispatch();
 
-  const auth = getAuth();
+  const auth = getFirebaseAuth();
 
   const [user, loading] = useAuthState(auth);
 
-  const db = getFirestore(initFirebase());
+  const db = getFirebaseDb();
 
   useEffect(() => {
     if (!loading) {

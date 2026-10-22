@@ -10,6 +10,10 @@ function Footer() {
   return (
     <footer id={styles.footer}>
       <section id={styles.info_container}>
+        <Link href="/" aria-label="KumoriTV home">
+          <img src="/logo.svg" alt="KumoriTV logo" height={32} className={styles.logo} />
+        </Link>
+
         <FooterHeading />
 
         <span id={styles.span_border1}></span>
@@ -21,7 +25,7 @@ function Footer() {
         <div className="center display_flex_row">
           <div>
             <small>
-              Copyright © {currYear}, AniProject. All Rights Reserved*
+              Copyright © {currYear}, KumoriTV. All Rights Reserved*
             </small>
           </div>
 
