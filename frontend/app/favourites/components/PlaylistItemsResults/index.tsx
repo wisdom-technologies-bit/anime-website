@@ -1,7 +1,7 @@
 "use client";
 import React, { useEffect, useState } from "react";
 import styles from "./component.module.css";
-import { getAuth } from "firebase/auth";
+import { getFirebaseAuth, getFirebaseDb } from "@/app/firebaseApp";
 import { useAuthState } from "react-firebase-hooks/auth";
 import { useSearchParams } from "next/navigation";
 import { doc, getDoc, getFirestore } from "firebase/firestore";
@@ -20,7 +20,7 @@ function PlaylistItemsResults({
 }) {
   const anilistUser = useAppSelector((state) => state.UserInfo.value);
 
-  const auth = getAuth();
+  const auth = getFirebaseAuth();
   const [user, loading] = useAuthState(auth);
 
   const [userBookmarksList, setUserBookmarksList] = useState<BookmarkItem[]>(
@@ -79,7 +79,7 @@ function PlaylistItemsResults({
   }, [params?.sort]);
 
   async function getUserBookmarksList() {
-    const db = getFirestore(initFirebase());
+    const db = getFirebaseDb();
 
     const bookmarksList: BookmarkItem[] = await getDoc(
       doc(db, "users", user?.uid || `${anilistUser?.id}`)

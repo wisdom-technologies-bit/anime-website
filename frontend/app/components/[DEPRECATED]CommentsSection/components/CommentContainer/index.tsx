@@ -28,7 +28,7 @@ import {
 } from "firebase/firestore";
 import { initFirebase } from "@/app/firebaseApp";
 import { useAuthState } from "react-firebase-hooks/auth";
-import { getAuth } from "firebase/auth";
+import { getFirebaseAuth, getFirebaseDb } from "@/app/firebaseApp";
 import WriteCommentFormContainer from "../WriteCommentForm";
 import {
   MediaData,
@@ -82,10 +82,10 @@ export default function Comment({
   const anilistUser = useAppSelector((state) => state.UserInfo.value);
   const dispatch = useAppDispatch();
 
-  const auth = getAuth();
+  const auth = getFirebaseAuth();
   const [user] = useAuthState(auth);
 
-  const db = getFirestore(initFirebase());
+  const db = getFirebaseDb();
 
   useEffect(() => {
     getCommentCurrLikesAndDislikes();

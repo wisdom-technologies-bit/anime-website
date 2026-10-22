@@ -4,7 +4,7 @@ import "@vidstack/react/player/styles/default/theme.css";
 import "@vidstack/react/player/styles/default/layouts/video.css";
 import { MediaDataFullInfo } from "@/app/ts/interfaces/anilistMediaData";
 import { initFirebase } from "@/app/firebaseApp";
-import { getAuth } from "firebase/auth";
+import { getFirebaseAuth, getFirebaseDb } from "@/app/firebaseApp";
 import {
   DocumentData,
   DocumentSnapshot,
@@ -106,10 +106,10 @@ export default function VideoPlayer({
 
   const anilistUser = useAppSelector((state) => state.UserInfo.value);
 
-  const auth = getAuth();
+  const auth = getFirebaseAuth();
   const [user, loading] = useAuthState(auth);
 
-  const db = getFirestore(initFirebase());
+  const db = getFirebaseDb();
 
   const router = useRouter();
 

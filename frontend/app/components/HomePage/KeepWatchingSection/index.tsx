@@ -3,7 +3,7 @@ import React, { useEffect, useState } from "react";
 import SwiperCarouselContainer from "../../SwiperCarouselContainer";
 import styles from "./component.module.css";
 import { AnimatePresence, motion } from "framer-motion";
-import { getAuth } from "firebase/auth";
+import { getFirebaseAuth, getFirebaseDb } from "@/app/firebaseApp";
 import { useAuthState } from "react-firebase-hooks/auth";
 import { doc, getDoc, getFirestore } from "firebase/firestore";
 import { initFirebase } from "@/app/firebaseApp";
@@ -29,10 +29,10 @@ const framerMotionVariants = {
 function KeepWatchingSection() {
   const anilistUser = useAppSelector((state) => state.UserInfo.value);
 
-  const auth = getAuth();
+  const auth = getFirebaseAuth();
   const [user] = useAuthState(auth);
 
-  const db = getFirestore(initFirebase());
+  const db = getFirebaseDb();
 
   const [watchingList, setWatchingList] = useState<KeepWatchingMediaData[]>([]);
   const [deletedFromWatchingList, setDeletedFromWatchingList] = useState<

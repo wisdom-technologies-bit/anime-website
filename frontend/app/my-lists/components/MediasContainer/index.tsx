@@ -1,7 +1,7 @@
 "use client";
 import React, { useEffect, useState } from "react";
 import styles from "./component.module.css";
-import { getAuth } from "firebase/auth";
+import { getFirebaseAuth, getFirebaseDb } from "@/app/firebaseApp";
 import { useAuthState } from "react-firebase-hooks/auth";
 import { doc, getDoc, getFirestore } from "firebase/firestore";
 import { initFirebase } from "@/app/firebaseApp";
@@ -52,7 +52,7 @@ export default function MediasContainer({
     (state) => state.UserInfo?.value as UserAnilist
   );
 
-  const auth = getAuth();
+  const auth = getFirebaseAuth();
   const [user, loading] = useAuthState(auth);
 
   const dispatch = useAppDispatch();
@@ -67,7 +67,7 @@ export default function MediasContainer({
   }, [user, anilistUser, loading]);
 
   async function getUserLists() {
-    const db = getFirestore(initFirebase());
+    const db = getFirebaseDb();
     const userDoc = await getDoc(
       doc(db, "users", user?.uid || `${anilistUser?.id}`)
     ).then((doc) => doc.data());

@@ -2,7 +2,7 @@
 import React, { useEffect, useState } from "react";
 import CheckSvg from "@/public/assets/check-circle.svg";
 import CheckFillSvg from "@/public/assets/check-circle-fill.svg";
-import { getAuth } from "firebase/auth";
+import { getFirebaseAuth, getFirebaseDb } from "@/app/firebaseApp";
 import { useAuthState } from "react-firebase-hooks/auth";
 import {
   FieldPath,
@@ -42,11 +42,11 @@ export default function MarkEpisodeAsWatchedButton({
 
   const anilistUser = useAppSelector((state) => state.UserInfo.value);
 
-  const auth = getAuth();
+  const auth = getFirebaseAuth();
 
   const [user] = useAuthState(auth);
 
-  const db = getFirestore(initFirebase());
+  const db = getFirebaseDb();
 
   useEffect(() => {
     setWasEpisodeWatched(wasWatched || false);

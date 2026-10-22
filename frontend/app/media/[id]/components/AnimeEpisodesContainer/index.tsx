@@ -16,7 +16,7 @@ import {
   AniwatchMediaData,
 } from "@/app/ts/interfaces/aniwatchData";
 import { useAuthState } from "react-firebase-hooks/auth";
-import { getAuth } from "firebase/auth";
+import { getFirebaseAuth, getFirebaseDb } from "@/app/firebaseApp";
 import {
   doc,
   DocumentData,
@@ -123,10 +123,10 @@ export default function EpisodesContainer({
 
   const anilistUser = useAppSelector((state) => state.UserInfo.value);
 
-  const auth = getAuth();
+  const auth = getFirebaseAuth();
   const [user] = useAuthState(auth);
 
-  const db = getFirestore(initFirebase());
+  const db = getFirebaseDb();
 
   // the episodes array length will be divided by 20, getting the range of pagination
   const rangeEpisodesPerPage = 20;

@@ -7,7 +7,7 @@ import NavigationButtons from "../../NavigationButtons";
 import { MediaData } from "@/app/ts/interfaces/anilistMediaData";
 import anilist from "@/app/api/anilist/anilistMedias";
 import { useAuthState } from "react-firebase-hooks/auth";
-import { getAuth } from "firebase/auth";
+import { getFirebaseAuth } from "@/app/firebaseApp";
 import { AnimatePresence, motion } from "framer-motion";
 import simulateRange from "@/app/lib/simulateRange";
 import { getUserAdultContentPreference } from "@/app/lib/user/userDocFetchOptions";
@@ -34,7 +34,7 @@ function MediaRankingSection({
   >(null);
   const [currFormat, setCurrFormat] = useState<"ANIME" | "MANGA">("ANIME");
 
-  const auth = getAuth();
+  const auth = getFirebaseAuth();
   const [user] = useAuthState(auth);
 
   async function getUserPreference() {

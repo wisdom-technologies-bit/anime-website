@@ -27,6 +27,15 @@ async function NewsHomePage() {
     topic: "industry",
   })) as News[];
 
+  if (!recentNewsList.length) {
+    return (
+      <main id={styles.container}>
+        <h1>News is coming soon</h1>
+        <p>We&apos;ll have the latest anime news here shortly.</p>
+      </main>
+    );
+  }
+
   return (
     recentNewsList &&
     mangasNewsList &&

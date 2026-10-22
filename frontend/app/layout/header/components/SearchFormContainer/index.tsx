@@ -9,7 +9,7 @@ import SearchIcon from "@/public/assets/search.svg";
 import CloseSvg from "@/public/assets/x.svg";
 import { AnimatePresence, motion } from "framer-motion";
 import { useAuthState } from "react-firebase-hooks/auth";
-import { getAuth } from "firebase/auth";
+import { getFirebaseAuth } from "@/app/firebaseApp";
 import { MediaOnJSONFile } from "@/app/ts/interfaces/jsonMediaData";
 import { getUserAdultContentPreference } from "@/app/lib/user/userDocFetchOptions";
 import { useAppSelector } from "@/app/lib/redux/hooks";
@@ -48,7 +48,7 @@ function SearchFormContainer() {
 
   const [searchInputValue, setSearchInputValue] = useState<string>("");
 
-  const auth = getAuth();
+  const auth = getFirebaseAuth();
   const [user] = useAuthState(auth);
 
   const anilistUser = useAppSelector((state) => state.UserInfo.value);
