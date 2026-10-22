@@ -54,7 +54,7 @@ app.use((req, res, next) => {
 });
 
 app.get('/', (req, res) => {
-    res.json({ message: 'Welcome to the AniProject API Server!' });
+    res.json({ message: 'Welcome to the KumoriTV API Server!' });
 });
 
 app.use("/search", searchRoute)
@@ -67,7 +67,7 @@ app.use("/imdb", imdbRoute)
 
 // Start server
 app.listen(port, () => {
-    console.log(`#### -> Starting AniProject API Server...`);
+    console.log(`#### -> Starting KumoriTV API Server...`);
     console.log(`#### -> Environment: ${process.env.DEV_MODE === 'true' ? 'Development' : 'Production'}`);
     console.log(`#### -> Server is live!`);
     console.log(`#### -> Listening on port: ${port}`);

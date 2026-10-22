@@ -1,6 +1,7 @@
 {
-  "name": "aniproject",
+  "name": "kumoritv",
   "version": "2.8.5",
+  "description": "Watch anime on KumoriTV.",
   "private": true,
   "scripts": {
     "dev": "next dev",

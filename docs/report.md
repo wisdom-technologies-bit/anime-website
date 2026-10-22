@@ -8,7 +8,7 @@
 
 | Item | Finding |
 |---|---|
-| Project name | KumoriTV in the current frontend branding; repository/project identity is `anime-website`. The root README and package metadata still contain historical AniProject terminology. |
+| Project name | KumoriTV in the current frontend branding; repository/project identity is `anime-website`. The root README and package metadata still contain historical KumoriTV terminology. |
 | Framework | Next.js App Router, React, TypeScript. The frontend is under `frontend/`; the root is not itself a Node application. |
 | Next version | `frontend/package.json` declares the installed/project Next.js version; the code uses App Router conventions (`app/`, route handlers, `next/headers`). Confirm the lockfile during the migration because the checked-out source targets the current Next runtime but contains synchronous `cookies()` calls that are incompatible with Next 16's async request APIs. |
 | Package manager | The frontend has its own package manifest and lockfile policy. Use the package manager indicated by `frontend/package.json`/lockfile rather than the repository root. |
@@ -144,8 +144,8 @@
 │   │       ├── mangadex.d.ts
 │   │       └── newsInterface.d.ts
 │   ├── public/
-│   │   ├── branding: logo.svg, logo.png, logo-mark.svg, favicon.svg, icon.png, og-image.png
-│   │   ├── PWA: manifest.json, android-chrome-*.png, apple-touch-icon.png, maskable-512.png
+│   │   ├── branding: logo.svg, logo-mark.svg, favicon.svg, og-image.png
+│   │   ├── PWA: manifest.json, android-chrome-*.png, apple-touch-logo-mark.svg, maskable-512.png
 │   │   ├── service worker sources: sw.ts, register-sw.ts
 │   │   └── assets/: icons, loaders, social/provider icons
 │   └── styles and CSS modules colocated with routes/components
@@ -512,9 +512,9 @@ The repository contains `.env.development.local`; values were not reproduced in 
 
 The frontend uses colocated CSS Modules (`*.module.css`) plus global CSS imported by the root layout and vendor theme CSS from Vidstack. It does not appear to be a Tailwind-first project. Theme variables/dark-mode classes are handled in global/component CSS; the exact toggle is wired through the header/settings surface rather than a centralized theme provider.
 
-Brand assets include `logo.svg`, `logo.png`, `logo-mark.svg`, `favicon.svg`, `icon.png`, `og-image.png`, PWA icons and `manifest.ts`/`public/manifest.json`. Root metadata in `layout.tsx` applies the current site title/description and Open Graph assets. KumoriTV branding is visible in the logo/metadata paths.
+Brand assets include `logo.svg`, `logo.svg`, `logo-mark.svg`, `favicon.svg`, `logo-mark.svg`, `og-image.png`, PWA icons and `manifest.ts`/`public/manifest.json`. Root metadata in `layout.tsx` applies the current site title/description and Open Graph assets. KumoriTV branding is visible in the logo/metadata paths.
 
-Old branding remains in repository documentation and likely in UI strings/assets or metadata that should be searched and removed: `AniProject`, `AnimeProject`, and related historical names. “News” remains an active route and feature; Consumet, Aniwatch and Firebase remain active technical branding. `frontend/README.md` and root `README.md` are handover/setup documents with historical references.
+Old branding remains in repository documentation and likely in UI strings/assets or metadata that should be searched and removed: `KumoriTV`, `KumoriTV`, and related historical names. “News” remains an active route and feature; Consumet, Aniwatch and Firebase remain active technical branding. `frontend/README.md` and root `README.md` are handover/setup documents with historical references.
 
 ## 11. PROBLEMS FOUND
 
@@ -556,7 +556,7 @@ Old branding remains in repository documentation and likely in UI strings/assets
 
 ### Leftovers
 
-`News`, `consumet`, `Aniwatch`, `Firebase`, `AniProject`/old branding and Redis are all still present in active code or documentation. No sitemap/robots route was found. No active `/api/watch` route was found. No obvious active Supabase code was found.
+`News`, `consumet`, `Aniwatch`, `Firebase`, `KumoriTV`/old branding and Redis are all still present in active code or documentation. No sitemap/robots route was found. No active `/api/watch` route was found. No obvious active Supabase code was found.
 
 ## 12. SUPABASE MIGRATION MAP
 
@@ -625,7 +625,7 @@ The planned `anime`, `episodes`, `pending_sync`, `episode_check_state`, `profile
 10. **Harden cookies, OAuth and provider content.** Validate request schemas, set secure/sameSite/httpOnly as appropriate, add CSRF/origin checks, restrict external URL schemes/origins and enforce server-side ownership. Files: all cookie route handlers, AniList OAuth route/middleware, watch route, Supabase RLS.
 11. **Add operational caching and synchronization.** Use `pending_sync` and `episode_check_state`, cache external catalog responses with explicit TTL/tags, and instrument provider failures. Files: data fetchers, new sync workers/routes, home/search/media/watch pages.
 12. **Complete accessibility and SEO.** Audit alt text, dialog focus/labels, keyboard controls, headings, captions, canonical/dynamic metadata, `sitemap.ts`, `robots.ts`, and analytics consent. Files: layout, metadata routes, dialogs/player/action buttons, relevant CSS.
-13. **Remove historical/dead code after migration.** Remove `[DEPRECATED]CommentsSection` if not retained, unused Firebase/Redis/provider dependencies, old AniProject branding, obsolete News/Consumet references and stale README instructions. Files: component tree, package manifests/lockfiles, public branding assets, READMEs.
+13. **Remove historical/dead code after migration.** Remove `[DEPRECATED]CommentsSection` if not retained, unused Firebase/Redis/provider dependencies, old KumoriTV branding, obsolete News/Consumet references and stale README instructions. Files: component tree, package manifests/lockfiles, public branding assets, READMEs.
 14. **Verify the deployment environment.** Inventory all env vars, add health-check diagnostics that do not expose secrets, test anonymous/authenticated flows, provider failures, responsive layouts, PWA registration, and production security headers. Files: env/config, `next.config.mjs`, test/e2e setup, deployment settings.
 
 ---
