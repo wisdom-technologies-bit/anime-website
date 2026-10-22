@@ -10,10 +10,6 @@ function Footer() {
   return (
     <footer id={styles.footer}>
       <section id={styles.info_container}>
-        <Link href="/" aria-label="KumoriTV home">
-          <img src="/logo.svg" alt="KumoriTV logo" height={32} className={styles.logo} />
-        </Link>
-
         <FooterHeading />
 
         <span id={styles.span_border1}></span>
