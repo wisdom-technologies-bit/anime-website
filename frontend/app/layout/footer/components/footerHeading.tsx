@@ -10,14 +10,10 @@ import styles from "../footerComponent.module.css";
 function FooterHeading() {
   return (
     <div id={styles.social_links_container} className="display_flex_row">
-      <Link id={styles.img_container} href="/">
-        <Image
-          src="/logo.png"
-          alt="Aniproject Site Logo"
-          fill
-          sizes="91px"
-        ></Image>
-      </Link>
+      <Link href="/" aria-label="KumoriTV home">
+          <img src="/logo.svg" alt="KumoriTV logo" height={32} className={styles.logo} />
+        </Link>
+
 
       <div id={styles.social_media_container}>
         <ul className="display_flex_row">
