@@ -44,3 +44,15 @@ export function requestMediasByDateRelease() {
 export function requestMediasByTrendingSort() {
   return `query Page($page: Int, $sort: [MediaTrendSort], $perPage: Int) { Page(page: $page, perPage: $perPage) { mediaTrends(sort: $sort) { mediaId date trending averageScore inProgress releasing episode popularity media { id idMal isAdult ${queryTitles} id ${queryMediaReviews} ${queryCoverImage} trailer { id site thumbnail } bannerImage type format status description season seasonYear seasonInt episodes duration chapters volumes countryOfOrigin isLicensed source hashtag updatedAt genres synonyms averageScore meanScore popularity isLocked trending favourites isFavourite isFavouriteBlocked isAdult siteUrl autoCreateForumThread isRecommendationBlocked isReviewBlocked modNotes } } } }`;
 }
+
+export const requestMediaById = () => `query($id: Int) { Media(id: $id) {
+  ${queryTitles} description(asHtml: true) isAdult status isFavourite ${queryMediaReviews}
+  relations { nodes { id genres type format ${queryTitles} ${queryCoverImage} } }
+  characters(sort: [ROLE, FAVOURITES_DESC]) { edges { role node { id name { full } image { large } } voiceActorRoles { voiceActor { id name { full } image { large } } } } }
+  recommendations { edges { node { mediaRecommendation { id ${queryTitles} ${queryCoverImage} format genres seasonYear isAdult } } } }
+  studios(isMain: true) { edges { node { name id isAnimationStudio siteUrl } } }
+  streamingEpisodes { title thumbnail url site }
+  nextAiringEpisode { id episode airingAt }
+  startDate { year month day } endDate { year month day } season seasonYear episodes chapters volumes duration source countryOfOrigin
+  trailer { id site thumbnail } updatedAt favourites trending id ${queryCoverImage} bannerImage type hashtag format genres popularity averageScore
+} }`;
