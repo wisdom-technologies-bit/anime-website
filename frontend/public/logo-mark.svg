@@ -1,1 +1,7 @@
-<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 512 512" width="512" height="512"><defs><linearGradient id="ag" x1="70" y1="120" x2="442" y2="398"><stop offset="0" stop-color="#7C5CFF"/><stop offset="1" stop-color="#FF5FA2"/></linearGradient><mask id="am"><rect width="512" height="512" fill="#fff"/><path d="M226 228 L226 336 L318 282 Z" fill="#000" stroke="#000" stroke-width="26" stroke-linejoin="round"/></mask></defs><g mask="url(#am)" fill="url(#ag)"><rect x="70" y="270" width="372" height="128" rx="64"/><circle cx="170" cy="275" r="72"/><circle cx="265" cy="225" r="105"/><circle cx="355" cy="290" r="68"/></g></svg>
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 512 512" width="512" height="512"><g transform="translate(0.00 -3.00) scale(1.0)">
+<defs>
+<linearGradient id="ag" gradientUnits="userSpaceOnUse" x1="70" y1="120" x2="442" y2="398"><stop offset="0" stop-color="#7C5CFF"/><stop offset="1" stop-color="#FF5FA2"/></linearGradient>
+<mask id="am" maskUnits="userSpaceOnUse" x="0" y="0" width="512" height="512"><rect width="512" height="512" fill="#fff"/><path d="M226 228 L226 336 L318 282 Z" fill="#000" stroke="#000" stroke-width="26" stroke-linejoin="round"/></mask>
+</defs>
+<g mask="url(#am)" fill="url(#ag)"><rect x="70" y="270" width="372" height="128" rx="64"/><circle cx="170" cy="275" r="72"/><circle cx="265" cy="225" r="105"/><circle cx="355" cy="290" r="68"/></g>
+</g></svg>
