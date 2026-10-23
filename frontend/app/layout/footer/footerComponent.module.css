@@ -318,3 +318,33 @@ div.list_container .grid_template li.list_item_placeholder {
         opacity: 0.25;
     }
 }
+
+/* Copyright and disclaimer styling */
+.copyright_text {
+  text-align: inherit;
+}
+
+.privacy_policy {
+  display: block;
+}
+
+.disclaimer {
+  text-align: center;
+  font-size: 11px;
+  margin-top: 8px;
+  padding: 0 12px;
+  opacity: 0.7;
+  color: #ffffff;
+}
+
+/* Mobile view */
+@media screen and (max-width: 768px) {
+  .privacy_policy {
+    display: none;
+  }
+
+  .copyright_text {
+    text-align: center;
+    width: 100%;
+  }
+}
