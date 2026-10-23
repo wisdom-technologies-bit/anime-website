@@ -20,7 +20,7 @@ export async function generateMetadata({ params }: { params: { id: number } }) {
   if (!mediaData) return { title: "Not Found | KumoriTV" };
 
   return {
-    title: `${mediaData.title.userPreferred} | KumoriTV`,
+    title: `${mediaData.title.english || mediaData.title.romaji || mediaData.title.native} | KumoriTV`,
     description:
       mediaData.description ||
       `See more info about ${mediaData.title.romaji || mediaData.title.native}`,
@@ -87,9 +87,18 @@ export default async function MediaPage({
 
       >
         <PageHeading
-          searchParams={searchParams}
-          mediaInfo={mediaInfo}
-        />
+  searchParams={searchParams}
+  mediaInfo={{
+    ...mediaInfo,
+    title: {
+      ...mediaInfo.title,
+      userPreferred:
+        mediaInfo.title.english ||
+        mediaInfo.title.romaji ||
+        mediaInfo.title.native,
+    },
+  }}
+/>
 
         <section id={styles.info_container}>
           <div id={styles.description_episodes_related_container}>
