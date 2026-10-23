@@ -28,62 +28,6 @@ export async function middleware(request: NextRequest) {
 
     if (request.nextUrl.pathname.startsWith("/watch")) {
 
-        const playWrongMedia = request.cookies.get("wrong_media_enabled")?.value
-
-        const queryParamString = new URLSearchParams(request.nextUrl.searchParams)
-
-        if (playWrongMedia == "true") {
-
-            return NextResponse.next({ headers: { authorization: `Bearer ${accessToken}` } })
-
-        }
-        else if (playWrongMedia == "false" && queryParamString.toString().includes("&alert") == false) {
-
-            if (accessToken) {
-                return NextResponse.redirect(`${request.nextUrl.origin}${request.nextUrl.pathname}?${queryParamString.toString()}&alert=true`,
-                    { headers: { authorization: `Bearer ${accessToken}` } }
-                )
-            }
-
-            return NextResponse.redirect(`${request.nextUrl.origin}${request.nextUrl.pathname}?${queryParamString.toString()}&alert=true`)
-
-        }
-
-        if (accessToken) {
-
-            return NextResponse.next({ headers: { authorization: `Bearer ${accessToken}` } })
-
-        }
-
-        return NextResponse.next()
-
-    }
-
-    if (request.nextUrl.pathname.startsWith("/media")) {
-
-        const mediaTitleLang = request.cookies.get("media_title_language")?.value
-        const isParamsOnPathname = request.nextUrl.search == `?lang=${mediaTitleLang}`
-
-        if (mediaTitleLang) {
-
-            if (accessToken) {
-
-                if (!isParamsOnPathname) {
-                    return NextResponse.redirect(`${request.nextUrl.origin}${request.nextUrl.pathname}?lang=${mediaTitleLang}`, { headers: { authorization: `Bearer ${accessToken}` } })
-                }
-
-                return NextResponse.next({ headers: { authorization: `Bearer ${accessToken}` } })
-
-            }
-
-            if (!isParamsOnPathname && mediaTitleLang) {
-
-                return NextResponse.redirect(`${request.nextUrl.origin}${request.nextUrl.pathname}?lang=${mediaTitleLang}`)
-
-            }
-
-        }
-
     }
 
     if (accessToken) {

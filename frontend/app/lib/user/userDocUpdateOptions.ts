@@ -30,7 +30,7 @@ export async function updateUserFavouriteMedias({
   userId,
   isAddAction,
 }: UpdateFavourites) {
-  const db = getFirestore(initFirebase());
+  const db = getFirestore(initFirebase() as any);
 
   await updateDoc(
     doc(db, "users", userId),
@@ -58,7 +58,7 @@ export async function updateUserMediaListByStatus({
   mediaData: UpdateFavourites["mediaData"];
   userId: string;
 }) {
-  const db = getFirestore(initFirebase());
+  const db = getFirestore(initFirebase() as any);
 
   await updateDoc(doc(db, "users", userId), {
     [`mediaListSavedByStatus.${[status.toLowerCase()]}`]: arrayUnion(
@@ -82,7 +82,7 @@ export async function removeMediaOnListByStatus({
   newListFiltered: UpdateFavourites["mediaData"];
   userId: string;
 }) {
-  const db = getFirestore(initFirebase());
+  const db = getFirestore(initFirebase() as any);
 
   await updateDoc(doc(db, "users", userId), {
     [`mediaListSavedByStatus.${[status.toLowerCase()]}`]: newListFiltered,

@@ -23,7 +23,7 @@ export async function createNewUserDocument({
 }: CreateUserComponentTypes) {
   if (!userFirebase && !userAnilist) return null;
 
-  const db = getFirestore(initFirebase());
+  const db = getFirestore(initFirebase() as any);
 
   const userId = userFirebase?.uid || `${userAnilist?.id}`;
 
