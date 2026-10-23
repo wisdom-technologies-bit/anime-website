@@ -86,15 +86,16 @@ export default async function MediaPage({
         id={styles.media_info_container}
 
       >
-        <PageHeading
+      <PageHeading
   searchParams={searchParams}
   mediaInfo={{
     ...mediaInfo,
     title: {
       ...mediaInfo.title,
       userPreferred:
-        mediaInfo.title.english ||
-        mediaInfo.title.romaji ||
+        mediaInfo.title.userPreferred?.trim() ||
+        mediaInfo.title.english?.trim() ||
+        mediaInfo.title.romaji?.trim() ||
         mediaInfo.title.native,
     },
   }}
