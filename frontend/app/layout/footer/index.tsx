@@ -22,7 +22,7 @@ function Footer() {
         <div className="center display_flex_row">
           <div>
             <small>
-              Copyright © {currYear}, KumoriTV. All Rights Reserved*
+              Copyright © {currYear}, KumoriTV. All Rights Reserved
             </small>
           </div>
 
