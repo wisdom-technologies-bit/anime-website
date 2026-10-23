@@ -1,6 +1,6 @@
 import { AiringMediaResult, MediaData, TrendingMediaResult } from '@/app/ts/interfaces/anilistMediaData';
 
-async function homeRequest(fn: string, options: Record<string, unknown>) {
+async function homeRequest(fn: string, options: Record<string, unknown>): Promise<any[]> {
   const params = new URLSearchParams({ fn });
   Object.entries(options).forEach(([key, value]) => { if (value !== undefined) params.set(key, String(value)); });
   try {

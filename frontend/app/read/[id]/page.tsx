@@ -8,7 +8,7 @@ import manga from "@/app/api/consumet/consumetManga";
 import {
   MediaData,
 } from "../../ts/interfaces/anilistMediaData";
-import ChaptersPages from "./components/ChaptersPages/index";
+import ChaptersPages from "./components/ChaptersPages/index.js";
 import ChaptersListContainer from "./components/ChaptersListContainer";
 import { getClosestMangaResultByTitle } from "@/app/lib/dataFetch/optimizedFetchMangaOptions";
 import { stringToUrlFriendly } from "@/app/lib/convertStrings";

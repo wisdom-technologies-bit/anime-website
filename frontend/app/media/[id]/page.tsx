@@ -46,7 +46,10 @@ export default async function MediaPage({
   const isOnMobileScreen = checkDeviceIsMobile(headers()) || false;
 
   const mediaInfo = (await getMediaInfo({ id: Number(params.id) })) as MediaDataFullInfo | null;
-  if (!mediaInfo) notFound();
+  if (!mediaInfo) {
+    notFound();
+    return null;
+  }
 
   // External episode providers are intentionally disabled until task 7a.
   const imdbMediaInfo = undefined;
@@ -66,7 +69,7 @@ export default async function MediaPage({
       return `linear-gradient(rgba(0, 0, 0, 0.05), var(--background) 100%), url(${mediaInfo?.coverImage?.extraLarge})`;
     } else {
       return `linear-gradient(rgba(0, 0, 0, 0.05), var(--background) 100%), url(${
-        mediaInfo.format == "MANGA" ? mediaInfo.bannerImage : randomizeBcgImg()
+        mediaInfo!.format == "MANGA" ? mediaInfo!.bannerImage : randomizeBcgImg()
       })`;
     }
   }

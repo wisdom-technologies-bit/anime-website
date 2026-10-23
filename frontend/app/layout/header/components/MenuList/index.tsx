@@ -150,9 +150,6 @@ function MenuList() {
                 </ul>
               </li>
 
-              <li role="menuitem" onClick={() => setIsMenuOpen(false)}>
-                <Link href={`/news`}>News</Link>
-              </li>
             </ul>
           </motion.div>
         )}

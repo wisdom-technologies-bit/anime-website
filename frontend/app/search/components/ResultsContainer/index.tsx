@@ -25,11 +25,9 @@ const framerMotionShowUp = {
 function ResultsContainer({
   mediasList,
   totalLength,
-  lastUpdate,
 }: {
   mediasList: MediaOnJSONFile[];
   totalLength: number | undefined;
-  lastUpdate: string;
 }) {
   const [currPageNumber, setCurrPageNumber] = useState<number>(1);
   const [isLoading, setIsLoading] = useState<boolean>(false);
@@ -141,14 +139,6 @@ function ResultsContainer({
         </span>
       )}
 
-      <span style={{ display: "block", fontSize: "var(--font-size--small-2" }}>
-        Last Update:{" "}
-        {new Date(lastUpdate).toLocaleDateString("en-us", {
-          day: "numeric",
-          month: "long",
-          year: "numeric",
-        }) || "undefined"}
-      </span>
     </div>
   );
 }

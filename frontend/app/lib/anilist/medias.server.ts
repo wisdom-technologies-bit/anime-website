@@ -22,12 +22,12 @@ function cached<T>(name: string, variables: Record<string, unknown>, ttl: number
 }
 
 export type MediaOptions = {
-  type: string; format?: string; sort?: string; showAdultContent?: boolean; status?: string;
+  type?: string; format?: string; sort?: string; showAdultContent?: boolean; status?: string;
   page?: number; perPage?: number; accessToken?: string; season?: string; seasonYear?: number;
   releasedOnLastXDays?: number; showOnlyReleasesOnThisDate?: boolean;
 };
 
-export async function getNewReleases(options: MediaOptions = {}) {
+export async function getNewReleases(options: MediaOptions = {}): Promise<any[]> {
   const { type = 'ANIME', format = 'TV', sort = 'POPULARITY_DESC', showAdultContent = false, status, page = 1, perPage = 20 } = options;
   const variables = { type, format, sort: options.releasedOnLastXDays ? 'TIME_DESC' : sort, perPage, page, status, season: status ? undefined : season(), seasonYear: new Date().getFullYear(), showAdultContent };
   try {
@@ -40,7 +40,7 @@ export async function getReleasingThisWeek(options: MediaOptions = {}) {
   return getNewReleases({ ...options, format: 'TV', sort: 'TRENDING_DESC', perPage: 10, season: season(), seasonYear: new Date().getFullYear() });
 }
 
-export async function getReleasingByDaysRange(options: MediaOptions & { days?: number; pageNumber?: number } = {}) {
+export async function getReleasingByDaysRange(options: MediaOptions & { days?: number; pageNumber?: number } = {}): Promise<any[]> {
   const { type = 'ANIME', days = 0, pageNumber = 1, perPage = 5, showAdultContent = false, showOnlyReleasesOnThisDate } = options;
   const variables = { type, page: pageNumber, perPage, sort: 'TIME_DESC', showAdultContent, airingAt_greater: timestamp(days, true), airingAt_lesser: timestamp(showOnlyReleasesOnThisDate ? days : 0, false) };
   try {
@@ -50,7 +50,7 @@ export async function getReleasingByDaysRange(options: MediaOptions & { days?: n
   } catch { return []; }
 }
 
-export async function getTrendingMedia(options: { sort?: string; showAdultContent?: boolean; accessToken?: string; page?: number; perPage?: number } = {}) {
+export async function getTrendingMedia(options: { sort?: string; showAdultContent?: boolean; accessToken?: string; page?: number; perPage?: number } = {}): Promise<any[]> {
   const { sort = 'TRENDING_DESC', showAdultContent = false, page = 1, perPage = 20 } = options;
   const variables = { sort, page, perPage };
   try {
