@@ -1,30 +1,43 @@
+
 #menu_container button#btn_open_menu {
-
+    display: flex;
+    flex: 0 0 32px;
+    align-items: center;
+    justify-content: center;
+    width: 32px;
+    min-width: 32px;
+    height: 32px;
+    margin: 0;
+    padding: 0;
+    box-sizing: border-box;
     background-color: transparent;
-
     border: 0;
-
-    margin-right: 32px;
-
 }
 
 #menu_container button#btn_open_menu svg {
-
+    display: block;
+    width: 18px;
+    height: 18px;
     fill: var(--white-100);
-    transform: scale(1.6);
-
-}
-
-@media(min-width: 1060px) {
-    #menu_container button#btn_open_menu {
-
-        display: none;
-
-    }
+    transform: none;
 }
 
 header#background #menu_container button#btn_open_menu {
-    margin-right: 32px;
+    margin-right: 0;
+}
+
+@media (max-width: 380px) {
+    #menu_container button#btn_open_menu {
+        flex-basis: 28px;
+        width: 28px;
+        min-width: 28px;
+        height: 28px;
+    }
+
+    #menu_container button#btn_open_menu svg {
+        width: 16px;
+        height: 16px;
+    }
 }
 
 /* MOBILE MENU VIEW WIDTH */
