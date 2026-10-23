@@ -11,17 +11,24 @@ import NotificationsContainer from "./components/Notifications";
 function Header() {
   return (
     <header id={styles.background}>
-      <div id={styles.container} className="display_flex_row padding_16px">
+      <div
+        id={styles.container}
+        className="display_flex_row padding_16px"
+      >
+        {/* LEFT: MENU AND LOGO */}
         <div
           id={styles.menu_and_logo_container}
           className="display_flex_row align_items_center"
         >
-          {/* MENU NAVIGATION -- SCREEN LEFT SIDE -- MOBILE*/}
           <MenuList />
 
           <Link href="/" id={styles.img_container}>
             <picture>
-              <source media="(max-width: 575px)" srcSet="/kumoritv-wordmark-dark.svg" />
+              <source
+                media="(max-width: 575px)"
+                srcSet="/kumoritv-wordmark-dark.svg"
+              />
+
               <img
                 id={styles.logo}
                 src="/logo-mark.svg"
@@ -32,17 +39,27 @@ function Header() {
           </Link>
         </div>
 
-        <div id={styles.navbar_container} className={`align_items_center`}>
+        {/* CENTRE: DESKTOP NAVIGATION */}
+        <nav
+          id={styles.navbar_container}
+          aria-label="Main navigation"
+        >
           <ul className="display_grid">
             <li className="display_flex_row align_items_center">
-              Animes{" "}
-              <ChevronDownIcon alt="Open Animes List" width={16} height={16} />
+              <span>Animes</span>
+
+              <ChevronDownIcon
+                alt="Open Animes List"
+                width={16}
+                height={16}
+              />
+
               <AnimeNavListHover />
             </li>
-
           </ul>
-        </div>
+        </nav>
 
+        {/* RIGHT: SEARCH, NOTIFICATIONS AND LOGIN */}
         <div
           id={styles.user_and_search_container}
           className="display_flex_row align_items_center"
