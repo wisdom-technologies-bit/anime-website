@@ -1,6 +1,6 @@
 import React from "react";
 import { cookies } from "next/headers";
-import anilistMedias from "@/app/api/anilist/anilistMedias";
+import * as anilistMedias from "@/app/lib/anilist/medias.server";
 import styles from "../../footerComponent.module.css";
 import Link from "next/link";
 
