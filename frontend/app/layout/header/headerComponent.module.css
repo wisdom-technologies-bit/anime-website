@@ -15,7 +15,7 @@ header#background > div#container {
     display: flex;
     flex-direction: row;
     align-items: center;
-    justify-content: space-between;
+    justify-content: flex-start;
     gap: 12px;
     margin: auto;
     width: 100%;
@@ -23,13 +23,14 @@ header#background > div#container {
     box-sizing: border-box;
 }
 
-/* LEFT: MENU AND LOGO */
+/* LEFT GROUP: MENU AND LOGO */
 
 #menu_and_logo_container {
     display: flex;
     flex: 0 0 auto;
     flex-direction: row;
     align-items: center;
+    justify-content: flex-start;
     gap: 10px;
     min-width: 0;
 }
@@ -41,27 +42,38 @@ header#background > div#container {
     justify-content: flex-start;
     position: relative;
     width: auto;
+    min-width: 0;
     height: 32px;
     aspect-ratio: auto;
     margin: 0;
     padding: 0;
+    line-height: 0;
 }
 
 #img_container picture {
     display: flex;
+    flex: 0 0 auto;
     align-items: center;
     justify-content: flex-start;
+    width: auto;
     height: 100%;
+    margin: 0;
+    padding: 0;
 }
+
+/* DESKTOP: SYMBOL-ONLY LOGO */
 
 #logo,
 .logo_image {
     display: block;
     flex: 0 0 auto;
-    width: 110px;
+    width: 32px;
+    min-width: 32px;
     height: 32px;
+    margin: 0;
+    padding: 0;
     object-fit: contain;
-    object-position: left center;
+    object-position: center;
 }
 
 /* HEADER BUTTONS */
@@ -71,12 +83,12 @@ header#background button.heading_btn {
     display: flex;
     align-items: center;
     justify-content: center;
-    background-color: var(--background);
-    padding: 0;
     width: 32px;
     min-width: 32px;
     height: 32px;
+    padding: 0;
     border: none;
+    background-color: var(--background);
 }
 
 header#background button svg {
@@ -91,16 +103,16 @@ header#background button svg {
     }
 }
 
-/* DESKTOP NAVIGATION */
+/* DESKTOP NAVIGATION: KEEP CLOSE TO LOGO */
 
 #navbar_container {
     display: flex;
-    flex: 1 1 auto;
+    flex: 0 0 auto;
     align-items: center;
     min-width: 0;
     width: auto;
-    padding-left: 4px;
     margin: 0;
+    padding: 0;
 }
 
 #navbar_container > ul {
@@ -138,8 +150,6 @@ header#background button svg {
     display: none;
 }
 
-/* NAVIGATION HOVER */
-
 #navbar_container > ul > li:hover {
     background-color: var(--black-100);
     color: var(--white-100);
@@ -152,11 +162,11 @@ header#background button svg {
 
 #navbar_container > ul > li > svg,
 #navbar_container > ul > li > a > svg {
-    margin-left: 4px;
     flex: 0 0 auto;
+    margin-left: 4px;
 }
 
-/* RIGHT: SEARCH, NOTIFICATIONS AND LOGIN */
+/* RIGHT GROUP */
 
 #user_and_search_container {
     display: flex;
@@ -169,7 +179,7 @@ header#background button svg {
     margin-left: auto;
 }
 
-/* TABLET AND MOBILE */
+/* MOBILE AND TABLET */
 
 @media (max-width: 1059px) {
     #navbar_container {
@@ -179,10 +189,10 @@ header#background button svg {
 
 @media (max-width: 767px) {
     header#background > div#container {
-        gap: 8px;
+        justify-content: space-between;
+        gap: 6px;
         min-height: 60px;
-        padding-left: 12px;
-        padding-right: 12px;
+        padding: 0 12px;
     }
 
     #menu_and_logo_container {
@@ -190,28 +200,31 @@ header#background button svg {
     }
 
     #menu_and_logo_container > a#img_container {
-        height: 30px;
+        height: 32px;
     }
 
+    #img_container picture {
+        height: 32px;
+    }
+
+    /* MOBILE WORDMARK */
     #logo,
     .logo_image {
-        width: 88px;
-        height: 30px;
+        width: 110px;
+        min-width: 110px;
+        height: 32px;
+        object-fit: contain;
+        object-position: left center;
     }
 
     #user_and_search_container {
-        gap: 4px;
-    }
-
-    header#background button.heading_btn {
-        width: 32px;
-        min-width: 32px;
-        height: 32px;
-        padding: 0;
+        flex: 0 1 auto;
+        gap: 6px;
+        margin-left: auto;
     }
 }
 
-/* SMALL MOBILE SCREENS */
+/* NARROW MOBILE SCREENS */
 
 @media (max-width: 380px) {
     header#background > div#container {
@@ -221,25 +234,22 @@ header#background button svg {
     }
 
     #menu_and_logo_container {
-        gap: 4px;
-    }
-
-    #menu_and_logo_container > a#img_container {
-        height: 28px;
+        gap: 5px;
     }
 
     #logo,
     .logo_image {
-        width: 76px;
-        height: 28px;
+        width: 96px;
+        min-width: 96px;
+        height: 30px;
     }
 
     #user_and_search_container {
-        gap: 2px;
+        gap: 3px;
     }
 }
 
-/* TABLET WIDTH */
+/* TABLET CONTENT WIDTH */
 
 @media (min-width: 576px) and (max-width: 768px) {
     header#background > div#container {
