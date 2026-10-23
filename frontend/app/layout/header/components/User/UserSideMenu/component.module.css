@@ -1,237 +1,213 @@
-
 #user_container {
-    position: relative;
-    flex: 0 0 auto;
+    position: static;
 }
 
 #user_container #user_btn {
-    box-sizing: border-box;
-    display: flex;
-    flex-direction: row;
-    align-items: center;
-    justify-content: center;
+
     gap: 0 4px;
+
     background-color: var(--background);
+
     height: 32px;
-    min-height: 32px;
     border: none;
+
 }
 
-/* LOGGED-OUT LOGIN BUTTON */
+#user_container #user_btn[data-useractive=false] {
 
-#user_container #user_btn[data-useractive="false"] {
-    height: 32px;
-    min-height: 32px;
-    padding: 4px 10px;
+    height: inherit;
+
     transition: all ease-in-out 60ms;
+
+    padding: 8px 16px;
+
     box-shadow: 1px 1px;
+
     background-color: var(--brand-color);
+
     border-radius: 4px;
-    gap: 0 6px;
+
+    gap: 0 8px;
+
 }
 
-#user_container #user_btn[data-useractive="false"]:hover {
+#user_container #user_btn[data-useractive=false]:hover {
     box-shadow: 3px 3px;
 }
 
-#user_container #user_btn[data-useractive="false"] span {
+#user_container #user_btn[data-useractive=false] span {
+
     color: var(--white-100);
+
     font-family: var(--font-family-sans-serif);
+
 }
 
-/* LOADING STATE */
+#user_container #user_btn[data-loading=true] {
 
-#user_container #user_btn[data-loading="true"] {
     background-color: transparent;
     box-shadow: 0 0 !important;
+
 }
 
-/* USER AVATAR */
-
 #user_container #user_btn #img_container {
+
     position: relative;
-    flex: 0 0 32px;
-    height: 32px;
+    height: inherit;
     width: 32px;
+
 }
 
 #user_container #user_btn #img_container img {
+
     border-radius: 50%;
     object-fit: cover;
+
 }
 
-#user_container #user_btn > svg.scale {
+#user_container #user_btn>svg.scale {
+
     margin-right: 4px;
-    transform: scale(1.2);
+
+    transform: scale(1.4);
+
 }
 
 #user_container #user_btn.active svg {
+
     fill: var(--brand-color);
+
 }
 
-#user_container #user_btn > span {
+#user_container #user_btn>span {
     display: flex;
 }
 
-/* ACCOUNT DROPDOWN */
+#user_container>#user_menu_list {
 
-#user_container > #user_menu_list {
-    box-sizing: border-box;
-    border-radius: 0 0 8px 8px;
+    border-radius: 0 0 8px 8px;;
+
     border: 0;
     background-color: var(--background);
+
     z-index: 100;
+
     position: absolute;
     top: 60px;
     right: 0;
-    left: auto;
+    left: 0;
+
     padding: 8px;
-    width: min(220px, 95vw);
+
     box-shadow: 5px 5px 4px 1px var(--black-75);
+
 }
 
-@media (min-width: 1061px) {
-    #user_container > #user_menu_list {
-        top: 69px;
+/* DESKTOP MENU VIEW WIDTH */
+@media(min-width: 576px) {
+
+    #user_container>#user_menu_list {
+        right: 0;
+        left: auto;
+
+        width: 220px;
     }
 }
 
-#user_container > #user_menu_list > ul {
+@media(min-width: 1061px) {
+
+    #user_container>#user_menu_list {
+
+        top: 69px;
+
+    }
+}
+
+#user_container>#user_menu_list>ul {
+
     display: flex;
     flex-direction: column;
     gap: 8px;
+
 }
 
-#user_container > #user_menu_list > ul > li {
+#user_container>#user_menu_list>ul>li {
+
     color: var(--brand-color);
+
 }
 
-#user_container > #user_menu_list > ul > li a {
+#user_container>#user_menu_list>ul>li a {
     font-size: var(--font-size--small-1);
 }
 
-#user_container > #user_menu_list ul ul li {
+#user_container>#user_menu_list ul ul li {
+
     margin: 8px 0;
-    padding: 8px;
+
+    padding: 8px 0;
+    padding-right: 8px;
     padding-left: 40px;
+
 }
 
-#user_container > #user_menu_list ul ul li:hover {
+#user_container>#user_menu_list ul ul li:hover {
+
     background-color: var(--black-05);
+
 }
 
-#user_container > #user_menu_list ul li > button:disabled {
+#user_container>#user_menu_list ul li>button:disabled {
+
     cursor: not-allowed;
+
     filter: brightness(50%);
+
 }
 
-#user_container > #user_menu_list ul li > button,
-#user_container > #user_menu_list ul li > a {
-    box-sizing: border-box;
+#user_container>#user_menu_list ul li>button,
+#user_container>#user_menu_list ul li>a {
+
     display: flex;
     align-items: center;
     gap: 0 8px;
+
     background-color: transparent;
+
     text-align: start;
     border: 1px solid var(--white-25);
     border-radius: 4px;
+
     color: var(--white-100);
+
     width: 100%;
+
     padding: 16px 8px;
+
     font-size: var(--font-size--small-1);
     font-weight: 600;
+
 }
 
-@media (min-width: 576px) {
-    #user_container > #user_menu_list ul li > button,
-    #user_container > #user_menu_list ul li > a {
+@media(min-width: 576px) {
+
+    #user_container>#user_menu_list ul li>button,
+    #user_container>#user_menu_list ul li>a {
         padding-top: 8px;
         padding-bottom: 8px;
     }
 }
 
-#user_container > #user_menu_list ul li > button:hover,
-#user_container > #user_menu_list ul li > a:hover {
+#user_container>#user_menu_list ul li>button:hover,
+#user_container>#user_menu_list ul li>a:hover {
+
     border: 1px solid var(--white-50);
+
 }
 
-#user_container > #user_menu_list ul li button:hover svg,
-#user_container > #user_menu_list ul li > a:hover svg {
+#user_container>#user_menu_list ul li button:hover svg,
+#user_container>#user_menu_list ul li>a:hover svg {
+
     fill: var(--brand-color);
-}
 
-
-/* MOBILE: KEEP THE FULL LOGIN BUTTON VISIBLE */
-
-@media (max-width: 768px) {
-    #user_container #user_btn[data-useractive="false"] {
-        display: inline-flex;
-        flex-direction: row;
-        align-items: center;
-        justify-content: center;
-        gap: 5px;
-
-        width: auto;
-        min-width: 0;
-        max-width: 100%;
-
-        height: 34px;
-        min-height: 34px;
-        padding: 0 10px;
-
-        box-sizing: border-box;
-        white-space: nowrap;
-        box-shadow: none;
-        border-radius: 5px;
-    }
-
-    #user_container #user_btn[data-useractive="false"] span {
-        display: inline-flex;
-        align-items: center;
-        font-size: 13px;
-        line-height: 1;
-    }
-
-    #user_container #user_btn[data-useractive="false"] > svg {
-        flex: 0 0 auto;
-        width: 20px;
-        height: 20px;
-        margin: 0;
-        transform: none;
-    }
-
-    #user_container #user_btn #img_container {
-        flex: 0 0 24px;
-        width: 24px;
-        height: 24px;
-    }
-}
-
-@media (max-width: 380px) {
-    #user_container #user_btn[data-useractive="false"] {
-        height: 32px;
-        min-height: 32px;
-        padding: 0 7px;
-        gap: 4px;
-    }
-
-    #user_container #user_btn[data-useractive="false"] span {
-        font-size: 12px;
-    }
-
-    #user_container #user_btn[data-useractive="false"] > svg {
-        width: 18px;
-        height: 18px;
-    }
-}
-
-/* VERY SMALL SCREENS */
-
-@media (max-width: 380px) {
-    #user_container #user_btn[data-useractive="false"] {
-        width: 30px;
-        min-width: 30px;
-        height: 30px;
-        min-height: 30px;
-    }
 }
