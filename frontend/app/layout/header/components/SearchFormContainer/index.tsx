@@ -1,5 +1,5 @@
 "use client";
-import React, { FormEvent, useState } from "react";
+import React, { FormEvent, useEffect, useRef, useState } from "react";
 import styles from "./component.module.css";
 import { MediaData } from "@/app/ts/interfaces/anilistMediaData";
 import anilist from "@/app/api/anilist/anilistMedias";
@@ -47,6 +47,7 @@ function SearchFormContainer() {
   >();
 
   const [searchInputValue, setSearchInputValue] = useState<string>("");
+  const searchAbortController = useRef<AbortController | null>(null);
 
   const auth = getFirebaseAuth();
   const [user] = useAuthState(auth);
@@ -68,19 +69,34 @@ function SearchFormContainer() {
     if (anilistUser)
       isAdultContentAllowed = anilistUser.options.displayAdultContent;
 
-    if (searchInputValue.length == 0) return;
+    if (searchInputValue.trim().length < 3) {
+      setSearchResultsList([]);
+      return;
+    }
 
+    searchAbortController.current?.abort();
+    const controller = new AbortController();
+    searchAbortController.current = controller;
     setIsLoading(true);
 
     const searchResults = await anilist.getSeachResults({
       query: searchInputValue,
       showAdultContent: isAdultContentAllowed,
+      signal: controller.signal,
     });
 
     setSearchResultsList(searchResults);
 
     setIsLoading(false);
   }
+
+  useEffect(() => {
+    if (searchInputValue.trim().length < 3) return;
+    const timer = window.setTimeout(() => {
+      void handleSearchFormSubmit(new Event("submit") as unknown as FormEvent<HTMLFormElement>);
+    }, 400);
+    return () => window.clearTimeout(timer);
+  }, [searchInputValue]);
 
   function toggleMobileSearchBarVisibility(value: boolean) {
     setIsMobileSearchBarOpen(value);

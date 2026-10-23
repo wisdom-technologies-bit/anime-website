@@ -11,7 +11,7 @@ export default function PageHeading({
   imdbEpisodes,
 }: {
   mediaInfo: MediaDataFullInfo;
-  imdbMediaInfo: ImdbMediaInfo;
+  imdbMediaInfo?: ImdbMediaInfo;
   searchParams: { lang?: string };
   imdbEpisodes?: ImdbEpisode[];
 }) {

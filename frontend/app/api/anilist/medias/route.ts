@@ -18,7 +18,7 @@ export async function GET(request: NextRequest) {
     return NextResponse.json({ result: await getMediaInfo({ id }) }, { headers: { 'Cache-Control': 'public, s-maxage=600, stale-while-revalidate=3600' } });
   }
   if (fn === 'search') {
-    const query = p.get('query')?.trim() || '';
+    const query = (p.get('query') ?? p.get('q'))?.trim() || '';
     if (query.length < 2 || query.length > 80) return NextResponse.json({ error: 'Invalid query' }, { status: 400 });
     return NextResponse.json({ results: await searchMedias({ query, showAdultContent: bool(p.get('showAdultContent')) ?? false, page: integer(p.get('page'), 1, 100, 1) || 1, perPage: integer(p.get('perPage'), 1, 50, 15) || 15 }) });
   }

@@ -4,27 +4,23 @@ import styles from "./page.module.css";
 import Image from "next/image";
 import parse from "html-react-parser";
 import * as MediaCard from "@/app/components/MediaCards/MediaCard";
-import EpisodesContainer from "./components/AnimeEpisodesContainer";
 import MangaChaptersContainer from "./components/MangaChaptersContainer";
 import ScoreRating from "@/app/components/DynamicAssets/ScoreRating";
 import { headers } from "next/headers";
 import { checkDeviceIsMobile } from "@/app/lib/checkMobileOrDesktop";
 import { convertFromUnix, getMediaReleaseDate } from "@/app/lib/formatDateUnix";
-import { getMediaInfoOnIMDB } from "@/app/api/consumet/consumetImdb";
-import { ImdbEpisode, ImdbMediaInfo } from "@/app/ts/interfaces/imdb";
 import MediaRelatedContainer from "./components/MediaRelatedContainer";
 import PageHeading from "./components/PageHeading";
 import Reviews from "./components/Reviews";
-import { getMediaInfo } from "@/app/api/mediaInfo/anilist/mediaInfo";
+import { getMediaInfo } from "@/app/lib/anilist/medias.server";
+import { notFound } from "next/navigation";
 
 export async function generateMetadata({ params }: { params: { id: number } }) {
-  const mediaData = await getMediaInfo({
-    id: params.id,
-    accessToken: headers().get("Authorization")?.slice(7),
-  });
+  const mediaData = await getMediaInfo({ id: Number(params.id) });
+  if (!mediaData) return { title: "Not Found | KumoriTV" };
 
   return {
-    title: `${mediaData.title.romaji || mediaData.title.native} | KumoriTV`,
+    title: `${mediaData.title.userPreferred} | KumoriTV`,
     description:
       mediaData.description ||
       `See more info about ${mediaData.title.romaji || mediaData.title.native}`,
@@ -49,52 +45,20 @@ export default async function MediaPage({
 }) {
   const isOnMobileScreen = checkDeviceIsMobile(headers()) || false;
 
-  const mediaInfo = (await getMediaInfo({
-    id: params.id,
-    accessToken: headers().get("Authorization")?.slice(7),
-  })) as MediaDataFullInfo;
-
-  // GET MEDIA INFO ON IMDB
-  const imdbMediaInfo = (await getMediaInfoOnIMDB({
-    search: true,
-    seachTitle: mediaInfo.title.romaji,
-    releaseYear: mediaInfo.startDate.year,
-  })) as ImdbMediaInfo;
-
-  function getCrunchyrollEpisodes() {
-    const sortEpisodesByEpisode = mediaInfo.streamingEpisodes?.sort((a, b) => {
-      const numA = Number(
-        a.title.slice(a.title?.search(/\b \b/), a.title?.search(/\b - \b/))
-      );
-      const numB = Number(
-        b.title.slice(b.title?.search(/\b \b/), b.title?.search(/\b - \b/))
-      );
-
-      return numA - numB;
-    });
-
-    return sortEpisodesByEpisode;
+  const mediaInfo = (await getMediaInfo({ id: Number(params.id) })) as MediaDataFullInfo | null;
+  if (!mediaInfo) {
+    notFound();
+    return null;
   }
 
-  // GET MEDIA EPISODES ON IMDB
-  function getImdbEpisodesListWithNoSeasons() {
-    const imdbEpisodesMapped: ImdbEpisode[] = [];
-
-    imdbMediaInfo?.seasons?.map((itemA) =>
-      itemA.episodes?.map((itemB) => imdbEpisodesMapped.push(itemB))
-    );
-
-    return imdbEpisodesMapped;
-  }
+  // External episode providers are intentionally disabled until task 7a.
+  const imdbMediaInfo = undefined;
 
   function randomizeBcgImg() {
     const backgroundImgs: { url: string }[] = [];
 
     if (mediaInfo?.bannerImage)
       backgroundImgs.push({ url: mediaInfo?.bannerImage });
-    if (imdbMediaInfo?.cover)
-      backgroundImgs.push({ url: imdbMediaInfo?.cover });
-
     const randomNumber = Math.floor(Math.random() * backgroundImgs?.length);
 
     return backgroundImgs[randomNumber]?.url;
@@ -105,7 +69,7 @@ export default async function MediaPage({
       return `linear-gradient(rgba(0, 0, 0, 0.05), var(--background) 100%), url(${mediaInfo?.coverImage?.extraLarge})`;
     } else {
       return `linear-gradient(rgba(0, 0, 0, 0.05), var(--background) 100%), url(${
-        mediaInfo.format == "MANGA" ? mediaInfo.bannerImage : randomizeBcgImg()
+        mediaInfo!.format == "MANGA" ? mediaInfo!.bannerImage : randomizeBcgImg()
       })`;
     }
   }
@@ -120,17 +84,11 @@ export default async function MediaPage({
 
       <div
         id={styles.media_info_container}
-        className={
-          imdbMediaInfo?.logos && imdbMediaInfo?.logos[0]
-            ? `${styles.custom_position}`
-            : ``
-        }
+
       >
         <PageHeading
           searchParams={searchParams}
           mediaInfo={mediaInfo}
-          imdbMediaInfo={imdbMediaInfo}
-          imdbEpisodes={getImdbEpisodesListWithNoSeasons()}
         />
 
         <section id={styles.info_container}>
@@ -226,24 +184,11 @@ export default async function MediaPage({
               </section>
             )}
 
-            {/* EPISODES - ONLY FOR ANIME */}
-            {mediaInfo.type == "ANIME" &&
-              mediaInfo.format != "MOVIE" &&
-              mediaInfo.status != "NOT_YET_RELEASED" && (
-                <section id={styles.episodes_container}>
-                  <EpisodesContainer
-                    crunchyrollInitialEpisodes={getCrunchyrollEpisodes()}
-                    mediaInfo={mediaInfo}
-                    episodesWatchedOnAnilist={
-                      mediaInfo.mediaListEntry?.progress || undefined
-                    }
-                    imdb={{
-                      mediaSeasons: imdbMediaInfo?.seasons,
-                      episodesList: getImdbEpisodesListWithNoSeasons(),
-                    }}
-                  />
-                </section>
-              )}
+            {mediaInfo.type == "ANIME" && mediaInfo.format != "MOVIE" && (
+              <section id={styles.episodes_container}>
+                <p>Episodes are being prepared. Check back soon.</p>
+              </section>
+            )}
 
             {/* CHAPTERS - ONLY FOR MANGAS */}
             {mediaInfo.type == "MANGA" && (
@@ -355,7 +300,7 @@ export default async function MediaPage({
               )}
 
             {/* SCORE */}
-            {(mediaInfo.averageScore || imdbMediaInfo?.rating != 0) && (
+            {mediaInfo.averageScore && (
               <div id={styles.score_container}>
                 <h2 className={styles.heading_style}>SCORE</h2>
 
@@ -373,16 +318,6 @@ export default async function MediaPage({
                     </li>
                   )}
 
-                  {imdbMediaInfo?.rating != 0 &&
-                    imdbMediaInfo?.rating != null && (
-                      <li className="display_flex_row align_items_center">
-                        <ScoreRating
-                          ratingScore={Number(imdbMediaInfo.rating.toFixed(1))}
-                          source="imdb"
-                          ratingType="string"
-                        />
-                      </li>
-                    )}
                 </ul>
               </div>
             )}

@@ -8,11 +8,11 @@ import manga from "@/app/api/consumet/consumetManga";
 import {
   MediaData,
 } from "../../ts/interfaces/anilistMediaData";
-import ChaptersPages from "./components/ChaptersPages/index";
+import ChaptersPages from "./components/ChaptersPages/index.js";
 import ChaptersListContainer from "./components/ChaptersListContainer";
 import { getClosestMangaResultByTitle } from "@/app/lib/dataFetch/optimizedFetchMangaOptions";
 import { stringToUrlFriendly } from "@/app/lib/convertStrings";
-import { getMediaInfo } from "@/app/api/mediaInfo/anilist/mediaInfo";
+import { getMediaInfo } from "@/app/lib/anilist/medias.server";
 
 export const revalidate = 1800; // revalidate cached data every 30 minutes
 

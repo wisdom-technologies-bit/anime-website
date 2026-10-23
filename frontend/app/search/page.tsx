@@ -37,7 +37,6 @@ async function SearchPage({ searchParams }: { searchParams: SearchPageTypes }) {
 
       <ResultsContainer
         mediasList={sortedMedias.results}
-        lastUpdate={sortedMedias.lastUpdate}
         totalLength={sortedMedias.allResultsLength}
       />
     </main>
