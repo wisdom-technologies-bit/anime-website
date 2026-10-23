@@ -19,7 +19,7 @@ import {
 } from "firebase/firestore";
 import { Auth, deleteUser, updateProfile } from "firebase/auth";
 import Image from "next/image";
-import { initFirebase } from "@/app/firebaseApp";
+import { initFirebase, getFirebaseDb, getFirebaseAuth } from "@/app/firebaseApp";
 import * as contantOptions from "./contantOptions";
 import anilistUsersActions from "@/app/api/anilist/anilistUsers";
 import userSettingsActions from "@/app/api/cookie/userCookieSettingsActions";

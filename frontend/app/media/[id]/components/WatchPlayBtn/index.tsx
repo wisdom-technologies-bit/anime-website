@@ -6,7 +6,7 @@ import PlaySvg from "@/public/assets/play2.svg";
 import LoadingSvg from "@/public/assets/Eclipse-1s-200px-custom-color.svg";
 import { useRouter } from "next/navigation";
 import { getAuth, User } from "firebase/auth";
-import { initFirebase } from "@/app/firebaseApp";
+import { initFirebase, getFirebaseDb, getFirebaseAuth } from "@/app/firebaseApp";
 import { useAuthState } from "react-firebase-hooks/auth";
 import { doc, getDoc, getFirestore } from "firebase/firestore";
 import {

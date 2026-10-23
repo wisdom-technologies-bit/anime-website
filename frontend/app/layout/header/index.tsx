@@ -3,11 +3,9 @@ import styles from "./headerComponent.module.css";
 import ChevronDownIcon from "@/public/assets/chevron-down.svg";
 import Link from "next/link";
 import AnimeNavListHover from "./components/AnimeNavListHover";
-import MangaNavListHover from "./components/MangaNavListHover";
 import UserSideMenu from "./components/User/UserSideMenu";
 import MenuList from "./components/MenuList";
 import SearchFormContainer from "./components/SearchFormContainer";
-import NewsNavListHover from "./components/NewsNavListHover";
 import NotificationsContainer from "./components/Notifications";
 
 function Header() {
@@ -42,19 +40,6 @@ function Header() {
               <AnimeNavListHover />
             </li>
 
-            <li className="display_flex_row align_items_center">
-              Mangas{" "}
-              <ChevronDownIcon alt="Open Mangas List" width={16} height={16} />
-              <MangaNavListHover />
-            </li>
-            <li className="display_flex_row align_items_center">
-              <Link href={"/news"}>
-                News{" "}
-                <ChevronDownIcon alt="Open News List" width={16} height={16} />
-              </Link>
-
-              <NewsNavListHover />
-            </li>
           </ul>
         </div>
 

@@ -1,3 +1,5 @@
+import { notFound } from "next/navigation";
+import { ENABLE_MANGA } from "@/app/lib/featureFlags";
 import React from "react";
 import styles from "./page.module.css";
 import * as MediaCardExpanded from "@/app/components/MediaCards/MediaInfoExpandedWithCover";
