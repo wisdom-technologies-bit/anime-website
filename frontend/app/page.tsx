@@ -2,7 +2,7 @@ import styles from "./page.module.css";
 import Link from "next/link";
 import React from "react";
 import HeroCarousel from "./components/HomePage/HeroCarouselHomePage";
-import anilist from "./api/anilist/anilistMedias";
+import * as anilist from "./lib/anilist/medias.server";
 import NavigationThroughMedias from "./components/HomePage/NavigationThroughMedias";
 import parse from "html-react-parser";
 import NewestMediaSection from "./components/HomePage/NewestMediaSection";
@@ -86,8 +86,10 @@ export default async function Home() {
       (res as MediaData[]).filter((item) => item.isAdult == false)
     );
 
-  const randomIndexForBannerSection =
-    Math.floor(Math.random() * (listMediasToBannerSection?.length || 10)) + 1;
+  const randomIndexForBannerSection = listMediasToBannerSection.length
+    ? Math.min(Math.floor(Math.random() * listMediasToBannerSection.length), listMediasToBannerSection.length - 1)
+    : 0;
+  const bannerMedia = listMediasToBannerSection[randomIndexForBannerSection];
 
   // section 4 data
   const listMediasReleasedToday = await anilist
@@ -130,34 +132,32 @@ export default async function Home() {
       </section>
 
       {/* SECTION => Media Banner With Trailer Embeded  */}
-      <section
+      {bannerMedia && <section
         id={styles.media_banner_container}
         style={{
-          background: `linear-gradient(rgba(0, 0, 0, 0.35), rgba(0, 0, 0, 0.35)), url(${listMediasToBannerSection[randomIndexForBannerSection]?.bannerImage})`,
+          background: `linear-gradient(rgba(0, 0, 0, 0.35), rgba(0, 0, 0, 0.35)), url(${bannerMedia.bannerImage})`,
         }}
       >
         <div>
           <div id={styles.media_info}>
-            {listMediasToBannerSection[randomIndexForBannerSection] && (
+            {bannerMedia && (
               <h3>
                 <Link
-                  href={`/media/${listMediasToBannerSection[randomIndexForBannerSection].id}`}
+                  href={`/media/${bannerMedia.id}`}
                 >
                   {
-                    listMediasToBannerSection[randomIndexForBannerSection].title
+                    bannerMedia.title
                       .romaji
                   }
                 </Link>
               </h3>
             )}
 
-            {listMediasToBannerSection[randomIndexForBannerSection]
+            {bannerMedia
               ?.description && (
               <span>
                 {parse(
-                  listMediasToBannerSection[
-                    randomIndexForBannerSection
-                  ].description.replace(
+                  bannerMedia.description.replace(
                     new RegExp(`<br[^>]*>|<\/br>`, "gi"),
                     " "
                   )
@@ -167,27 +167,27 @@ export default async function Home() {
 
             <div className={styles.item_buttons}>
               <Link
-                href={`/media/${listMediasToBannerSection[randomIndexForBannerSection].id}`}
+                href={`/media/${bannerMedia.id}`}
               >
                 WATCH NOW
               </Link>
 
               <AddToPlaylistButton.Button
                 mediaInfo={
-                  listMediasToBannerSection[randomIndexForBannerSection]
+                  bannerMedia
                 }
               />
             </div>
           </div>
 
           <div id={styles.player_button_container}>
-            {listMediasToBannerSection[randomIndexForBannerSection].trailer && (
+            {bannerMedia.trailer && (
               <iframe
                 className="yt_embed_video"
-                src={`https://www.youtube.com/embed/${listMediasToBannerSection[randomIndexForBannerSection].trailer.id}?controls=0&showinfo=0`}
+                src={`https://www.youtube.com/embed/${bannerMedia.trailer.id}?controls=0&showinfo=0`}
                 frameBorder={0}
                 title={
-                  listMediasToBannerSection[randomIndexForBannerSection].title
+                  bannerMedia.title
                     .romaji + " Trailer"
                 }
                 allow="accelerometer; autoplay; encrypted-media; gyroscope;"
@@ -196,7 +196,7 @@ export default async function Home() {
             )}
           </div>
         </div>
-      </section>
+      </section>}
 
       {/* SECTION => SHOWS MEDIAS SORTED BY FAVOURITES */}
       <section
