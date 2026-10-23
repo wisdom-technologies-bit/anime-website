@@ -16,6 +16,21 @@ function stale<T>(key: string): T | undefined {
   return lastGoodResults.get(key) as T | undefined;
 }
 
+function normalizeTitles(value: unknown): void {
+  if (!value || typeof value !== 'object') return;
+  if (Array.isArray(value)) {
+    value.forEach(normalizeTitles);
+    return;
+  }
+  const object = value as Record<string, unknown>;
+  const title = object.title;
+  if (title && typeof title === 'object') {
+    const titleObject = title as Record<string, unknown>;
+    titleObject.userPreferred = titleObject.english || titleObject.romaji || titleObject.native;
+  }
+  Object.values(object).forEach(normalizeTitles);
+}
+
 function acquireSlot() {
   const now = Date.now();
   while (requestTimes[0] && now - requestTimes[0] >= 60000) requestTimes.shift();
@@ -54,6 +69,7 @@ export async function anilistFetch<T>(query: string, variables: Record<string, u
     if (!response.ok) throw new AniListUnavailableError(`AniList HTTP ${response.status}`);
     const payload = (await response.json()) as { data?: T; errors?: unknown[] };
     if (payload.errors?.length || payload.data === undefined) throw new AniListUnavailableError('AniList GraphQL error');
+    normalizeTitles(payload.data);
     lastGoodResults.set(key, payload.data);
     return payload.data;
   } catch (error) {

@@ -5,7 +5,7 @@ import ResultsContainer from "./components/ResultsContainer";
 import { headers } from "next/headers";
 import { checkDeviceIsMobile } from "../lib/checkMobileOrDesktop";
 import { Metadata } from "next";
-import { animeDatabaseSearchMedias } from "../api/search/anime-database/search";
+import { searchCatalog } from "@/app/lib/anilist/medias.server";
 
 export const metadata: Metadata = {
   title: "Search | KumoriTV",
@@ -27,7 +27,7 @@ type SearchPageTypes = {
 async function SearchPage({ searchParams }: { searchParams: SearchPageTypes }) {
   const isMobile = checkDeviceIsMobile(headers());
 
-  const sortedMedias = await animeDatabaseSearchMedias({ searchParams });
+  const sortedMedias = await searchCatalog(searchParams);
 
   return (
     <main id={styles.container}>

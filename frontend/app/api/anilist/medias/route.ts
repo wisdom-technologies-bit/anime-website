@@ -1,5 +1,5 @@
 import { NextRequest, NextResponse } from 'next/server';
-import { getMediaForThisFormat, getNewReleases, getReleasingByDaysRange, getReleasingThisWeek, getTrendingMedia } from '@/app/lib/anilist/medias.server';
+import { getMediaForThisFormat, getMediaInfo, getNewReleases, getReleasingByDaysRange, getReleasingThisWeek, getTrendingMedia, searchCatalog, searchMedias } from '@/app/lib/anilist/medias.server';
 
 const enums = {
   type: ['ANIME', 'MANGA'], format: ['TV', 'TV_SHORT', 'MOVIE', 'OVA', 'ONA', 'SPECIAL', 'MUSIC'],
@@ -12,6 +12,17 @@ const integer = (value: string | null, min: number, max: number, fallback?: numb
 export async function GET(request: NextRequest) {
   const p = request.nextUrl.searchParams;
   const fn = p.get('fn');
+  if (fn === 'mediaInfo') {
+    const id = integer(p.get('id'), 1, 2147483647);
+    if (id === null || id === undefined) return NextResponse.json({ error: 'Invalid id' }, { status: 400 });
+    return NextResponse.json({ result: await getMediaInfo({ id }) }, { headers: { 'Cache-Control': 'public, s-maxage=600, stale-while-revalidate=3600' } });
+  }
+  if (fn === 'search') {
+    const query = p.get('query')?.trim() || '';
+    if (query.length < 2 || query.length > 80) return NextResponse.json({ error: 'Invalid query' }, { status: 400 });
+    return NextResponse.json({ results: await searchMedias({ query, showAdultContent: bool(p.get('showAdultContent')) ?? false, page: integer(p.get('page'), 1, 100, 1) || 1, perPage: integer(p.get('perPage'), 1, 50, 15) || 15 }) });
+  }
+  if (fn === 'searchCatalog') return NextResponse.json(await searchCatalog(Object.fromEntries(p.entries())));
   if (!['getNewReleases', 'getReleasingThisWeek', 'getReleasingByDaysRange', 'getTrendingMedia', 'getMediaForThisFormat'].includes(fn || '')) return NextResponse.json({ error: 'Invalid fn' }, { status: 400 });
   const pick = <K extends keyof typeof enums>(key: K) => { const value = p.get(key); return value === null ? undefined : (enums[key] as readonly string[]).includes(value) ? value : null; };
   const type = pick('type'); const format = pick('format'); const sort = pick('sort'); const status = pick('status'); const season = pick('season');
