@@ -59,12 +59,13 @@ export async function GET(request: NextRequest) {
       );
     }
 
+    // Default for guests = true
     return NextResponse.json(
       {
-        message: "No Cookie Found",
+        isAdultContentEnabled: "true",
       },
       {
-        status: 404,
+        status: 201,
       }
     );
   } catch (err) {
