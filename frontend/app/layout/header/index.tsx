@@ -24,7 +24,7 @@ function Header() {
               <source media="(max-width: 575px)" srcSet="/logo-mark.svg" />
               <img
                 id={styles.logo}
-                src="/logo.svg"
+                src="/logo-mark.svg"
                 alt="KumoriTV logo"
                 className={styles.logo_image}
               />
