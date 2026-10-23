@@ -17,6 +17,7 @@ function Footer() {
         <NavLinks />
       </section>
 
+
       <section id={styles.copyright_section} className="">
         <div className="center display_flex_row">
           <div>
@@ -27,10 +28,23 @@ function Footer() {
 
           <div>
             <Link href="#">
-              <small>Privacy Police</small>
+              <small>Privacy Policy</small>
             </Link>
           </div>
         </div>
+
+        <p
+          style={{
+            textAlign: "center",
+            fontSize: "11px",
+            marginTop: "8px",
+            padding: "0 12px",
+            opacity: 0.7,
+          }}
+        >
+          Disclaimer: This site KumoriTV does not store any files on its server.
+          All contents are provided by non-affiliated third parties.
+        </p>
       </section>
     </footer>
   );
