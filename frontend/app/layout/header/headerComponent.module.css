@@ -16,7 +16,7 @@ header#background > div#container {
     flex-direction: row;
     align-items: center;
     justify-content: space-between;
-    gap: 16px;
+    gap: 12px;
     margin: auto;
     width: 100%;
     min-height: 60px;
@@ -30,7 +30,7 @@ header#background > div#container {
     flex: 0 0 auto;
     flex-direction: row;
     align-items: center;
-    gap: 12px;
+    gap: 10px;
     min-width: 0;
 }
 
@@ -67,18 +67,23 @@ header#background > div#container {
 /* HEADER BUTTONS */
 
 header#background button.heading_btn {
+    box-sizing: border-box;
+    display: flex;
+    align-items: center;
+    justify-content: center;
     background-color: var(--background);
-    padding: 8px;
+    padding: 0;
+    width: 32px;
+    min-width: 32px;
     height: 32px;
     border: none;
-    box-sizing: border-box;
 }
 
 header#background button svg {
     fill: var(--white-100);
 }
 
-/* HIDE THE MOBILE MENU BUTTON ON DESKTOP */
+/* HIDE MENU BUTTON ON DESKTOP */
 
 @media (min-width: 1060px) {
     header#background button#btn_open_menu {
@@ -86,7 +91,7 @@ header#background button svg {
     }
 }
 
-/* CENTRE: DESKTOP NAVIGATION */
+/* DESKTOP NAVIGATION */
 
 #navbar_container {
     display: flex;
@@ -94,7 +99,7 @@ header#background button svg {
     align-items: center;
     min-width: 0;
     width: auto;
-    padding-left: 12px;
+    padding-left: 4px;
     margin: 0;
 }
 
@@ -115,7 +120,7 @@ header#background button svg {
     align-items: center;
     position: relative;
     width: max-content;
-    padding: 20px 12px;
+    padding: 20px 8px;
     font-weight: 500;
     color: var(--brand-color);
     cursor: pointer;
@@ -199,8 +204,10 @@ header#background button svg {
     }
 
     header#background button.heading_btn {
-        padding: 6px;
+        width: 32px;
+        min-width: 32px;
         height: 32px;
+        padding: 0;
     }
 }
 
@@ -217,6 +224,10 @@ header#background button svg {
         gap: 4px;
     }
 
+    #menu_and_logo_container > a#img_container {
+        height: 28px;
+    }
+
     #logo,
     .logo_image {
         width: 76px;
@@ -228,7 +239,7 @@ header#background button svg {
     }
 }
 
-/* EXISTING CONTENT WIDTHS */
+/* TABLET WIDTH */
 
 @media (min-width: 576px) and (max-width: 768px) {
     header#background > div#container {
@@ -236,6 +247,8 @@ header#background button svg {
         max-width: 100%;
     }
 }
+
+/* DESKTOP CONTENT WIDTHS */
 
 @media (min-width: 1201px) and (max-width: 1400px) {
     header#background > div#container {
