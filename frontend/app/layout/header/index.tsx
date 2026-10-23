@@ -21,10 +21,10 @@ function Header() {
 
           <Link href="/" id={styles.img_container}>
             <picture>
-              <source media="(max-width: 575px)" srcSet="/logo-mark.svg" />
+              <source media="(max-width: 575px)" srcSet="/logo.svg" />
               <img
                 id={styles.logo}
-                src="/logo-mark.svg"
+                src="/logo.svg"
                 alt="KumoriTV logo"
                 className={styles.logo_image}
               />
