@@ -41,60 +41,20 @@ function NavLinks() {
         <span id={styles.span_border2}></span>
 
         <div id={styles.div_custom_margin}>
-          <h5>About</h5>
+          <h5>Explore</h5>
 
           <ul>
             <li>
-              <Link
-                href="https://github.com/ErickLimaS/anime-website/"
-                target="_blank"
-              >
-                This Project
-              </Link>
-            </li>
-
-            {/* What about leave a link to the creator's repository? /}
-                {/* 😊 */}
-            {/* 
-                <li>
-                  <Link
-                    href="https://github.com/ErickLimaS/anime-website/"
-                    target="_blank"
-                  >
-                    Forked From ErickLimaS
-                  </Link>
-                </li> 
-            */}
-
-            <li>
-              <Link
-                href="https://anilist.gitbook.io/anilist-apiv2-docs/"
-                target="_blank"
-              >
-                AniList API
-              </Link>
+              <Link href="/">Home</Link>
             </li>
             <li>
-              <Link href="https://docs.consumet.org/" target="_blank">
-                Consumet API
-              </Link>
+              <Link href="/search">Search Anime</Link>
             </li>
             <li>
-              <Link
-                href="https://github.com/ghoshRitesh12/aniwatch-api"
-                target="_blank"
-              >
-                Aniwatch API
-              </Link>
+              <Link href="/airing-schedule">Airing Schedule</Link>
             </li>
-            {/* REMOVE THE ITEM BELLOW IF YOU FORKED THIS PROJECT */}
             <li>
-              <Link
-                href="https://www.fiverr.com/erick_limas/create-a-responsive-landpage-using-react-next-js-javascript-or-typescript"
-                target="_blank"
-              >
-                Want a website?
-              </Link>
+              <Link href="/genres">Genres</Link>
             </li>
           </ul>
         </div>
