@@ -12,7 +12,7 @@ import ChaptersPages from "./components/ChaptersPages/index";
 import ChaptersListContainer from "./components/ChaptersListContainer";
 import { getClosestMangaResultByTitle } from "@/app/lib/dataFetch/optimizedFetchMangaOptions";
 import { stringToUrlFriendly } from "@/app/lib/convertStrings";
-import { getMediaInfo } from "@/app/api/mediaInfo/anilist/mediaInfo";
+import { getMediaInfo } from "@/app/lib/anilist/medias.server";
 
 export const revalidate = 1800; // revalidate cached data every 30 minutes
 
