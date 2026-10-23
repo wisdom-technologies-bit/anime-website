@@ -93,7 +93,6 @@ export default async function MediaPage({
     title: {
       ...mediaInfo.title,
       userPreferred:
-        mediaInfo.title.userPreferred?.trim() ||
         mediaInfo.title.english?.trim() ||
         mediaInfo.title.romaji?.trim() ||
         mediaInfo.title.native,
