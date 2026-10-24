@@ -13,6 +13,9 @@ export const runtime = "nodejs";
 export const dynamic = "force-dynamic";
 export const maxDuration = 60;
 const cache = new Map<string, { at: number; value: any }>();
+export function watchCacheKey(input: { id: string | number; episode: string | number; provider?: string | null; server?: string | null; exclude?: string[]; audio: string; sublang: string }) {
+  return [input.id, input.episode, input.provider || "", input.server || "", input.exclude?.join(",") || "", input.audio, input.sublang.trim().toLowerCase()].join("-");
+}
 const hits = new Map<string, number[]>();
 const json = (body: any, status = 200) =>
   new Response(JSON.stringify(body), {
@@ -26,12 +29,13 @@ function valid(id: string, max: number) {
   const n = Number(id);
   return Number.isInteger(n) && n > 0 && n < max ? n : null;
 }
-async function resolveProvider(
+  async function resolveProvider(
   provider: string,
   entry: any,
   audio: string,
   exclude: string[],
   trace: any[],
+  requestedServer?: string | null,
 ) {
   const started = Date.now();
   try {
@@ -51,6 +55,7 @@ async function resolveProvider(
     );
     const candidates = qualified.sort(
       (a: any, b: any) =>
+        Number(requestedServer && b.server === requestedServer) - Number(requestedServer && a.server === requestedServer) ||
         Number(b.isActive === true) - Number(a.isActive === true) ||
         Number(b.priority || 0) - Number(a.priority || 0) ||
         Number(a.index || 0) - Number(b.index || 0),
@@ -122,7 +127,8 @@ export async function GET(
       .filter(Boolean),
     refresh = url.searchParams.get("refresh") === "1",
     debug = url.searchParams.get("debug") === "1",
-    requestedProvider = url.searchParams.get("provider");
+    requestedProvider = url.searchParams.get("provider"),
+    requestedServer = url.searchParams.get("server");
   if (!id || !episode) return json({ error: "invalid_episode" }, 400);
   if (!["sub", "dub"].includes(audio))
     return json({ error: "invalid_audio" }, 400);
@@ -134,7 +140,7 @@ export async function GET(
   if (recent.length >= 40) return json({ error: "rate_limited" }, 429);
   recent.push(now);
   hits.set(ip, recent);
-  const key = `${id}-${episode}-${audio}-${exclude.join(",")}-${sublang}`,
+  const key = watchCacheKey({ id, episode, provider: requestedProvider, server: requestedServer, exclude, audio, sublang }),
     cached = cache.get(key);
   if (!refresh && !debug && cached && now - cached.at < 300000)
     return json(cached.value);
@@ -154,9 +160,9 @@ export async function GET(
       .maybeSingle());
   }
   if (!row) return json({ error: "episode_not_found" }, 404);
-  const providers = (
-    Array.isArray(row[`${audio}_providers`]) ? row[`${audio}_providers`] : []
-  ).filter((p: any) => !requestedProvider || p.provider === requestedProvider);
+  const allProviders = Array.isArray(row[`${audio}_providers`]) ? row[`${audio}_providers`] : [];
+  if (requestedProvider && !allProviders.some((p: any) => p.provider === requestedProvider)) return json({ error: "unknown_provider" }, 400);
+  const providers = allProviders.filter((p: any) => !requestedProvider || p.provider === requestedProvider);
   if (!providers.length) {
     const availableAudio = ["sub", "dub"].filter(
       (a) =>
@@ -184,6 +190,7 @@ export async function GET(
         audio,
         exclude,
         trace,
+        requestedServer,
       );
   }
   if (!winner) {
@@ -226,7 +233,7 @@ export async function GET(
       sublang,
     ),
     subs = normalized.subtitles,
-    intro = normalizeIntroOutro(winner.json),
+    intro = normalizeIntroOutro(winner.json, stream),
     availableAudio = ["sub", "dub"].filter(
       (a) =>
         Array.isArray(row[`${a}_providers`]) && row[`${a}_providers`].length,
@@ -250,7 +257,7 @@ export async function GET(
     resolvedAt: new Date().toISOString(),
   };
   try {
-    if (stream.type === "embed") result.embedUrl = stream.embed;
+    if (stream.type === "embed") result.embedUrl = stream.embedUrl || stream.url;
     else {
       result.url = await proxyUrl(
         stream.type === "hls" ? "manifest" : "segment",
@@ -272,12 +279,8 @@ export async function GET(
       result.subtitles = await Promise.all(
         subs.map(async (s: any) => ({
           ...s,
-          url: await proxyUrl("subtitle", {
-            u: s.upstreamUrl,
-            h: winner.headers,
-            f: s.format,
-          }),
-        })),
+          url: await proxyUrl("subtitle", { u: s.url, h: winner.headers, f: "vtt" }),
+        })), 
       );
     }
   } catch (error) {
