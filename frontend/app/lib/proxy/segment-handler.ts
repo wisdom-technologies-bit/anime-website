@@ -3,7 +3,13 @@ import type { ProxyPayload } from "@/app/lib/proxy/signing";
 
 const RETRY_STATUSES = new Set([403, 408, 425, 429]);
 const isRetryStatus = (status: number) => RETRY_STATUSES.has(status) || status >= 500;
-const isBlockChunk = (chunk: Uint8Array) => new TextDecoder().decode(chunk).trimStart().startsWith("<!") || new TextDecoder().decode(chunk).trimStart().startsWith("<html") || new TextDecoder().decode(chunk).trimStart().startsWith("<HTML");
+const isBlockChunk = (chunk: Uint8Array) => {
+  const text = new TextDecoder().decode(chunk).trimStart();
+  return text.startsWith("<!") || text.startsWith("<html") || text.startsWith("<HTML") ||
+    (chunk.length >= 4 && chunk[0] === 0xff && chunk[1] === 0xd8 && chunk[2] === 0xff) ||
+    (chunk.length >= 8 && chunk[0] === 0x89 && chunk[1] === 0x50 && chunk[2] === 0x4e && chunk[3] === 0x47) ||
+    (chunk.length >= 4 && chunk[0] === 0x47 && chunk[1] === 0x49 && chunk[2] === 0x46 && chunk[3] === 0x38);
+};
 const sleep = (ms: number) => new Promise((resolve) => setTimeout(resolve, ms));
 
 function streamWithFirstChunk(reader: ReadableStreamDefaultReader<Uint8Array>, first: Uint8Array, bytes: { value: number }) {
