@@ -1,3 +1,86 @@
-const LANGS: Record<string,string> = { english:"en", arabic:"ar", french:"fr", spanish:"es", portuguese:"pt", german:"de", italian:"it", russian:"ru", indonesian:"id", japanese:"ja", chinese:"zh", korean:"ko", turkish:"tr", vietnamese:"vi", thai:"th", hindi:"hi", polish:"pl", dutch:"nl" };
-export function labelToLang(label: string) { const word = (label || "").trim().split(/[\s(\[]/)[0].toLowerCase(); return { lang: LANGS[word] || "und", name: label || "Unknown", kind: /signs|songs|forced/i.test(label) ? "signs" : /dubtitle/i.test(label) ? "dubtitle" : "full" } as const; }
-export function normalizeSubtitles(streamSubtitles: any[] = [], topLevelSubtitles: any[] = [], preferredLang = "en") { const map = new Map<string, any>(); for (const item of [...streamSubtitles, ...topLevelSubtitles]) { if (!item?.url) continue; const format = String(item.format || item.url.split(/[?#]/)[0].split(".").pop() || "").toLowerCase(); if (!["ass","srt","vtt"].includes(format)) continue; const raw=String(item.language||item.label||"Unknown"); const meta=labelToLang(raw); if(!map.has(item.url)) map.set(item.url,{...meta,format,upstreamUrl:item.url,rawLabel:raw}); } const grouped=new Map<string,number>(); const items=[...map.values()].sort((a,b)=>Number(b.lang===preferredLang)-Number(a.lang===preferredLang)||Number(a.kind!=="full")-Number(b.kind!=="full")); return items.map((item,i)=>{const n=(grouped.get(item.lang)||0)+1;grouped.set(item.lang,n);const hint=/sign/i.test(item.rawLabel)?" (Signs)":/song/i.test(item.rawLabel)?" (Songs)":/forced/i.test(item.rawLabel)?" (Forced)":n>1?` (${n})`:"";return {...item,id:`sub-${i+1}`,label:(item.lang===preferredLang?"English":item.rawLabel)+hint+(n>1&&!hint?` (${n})`:""),default:i===0&&item.kind==="full"};}); }
+const LANGS: Record<string, string> = {
+  english: "en",
+  arabic: "ar",
+  french: "fr",
+  spanish: "es",
+  portuguese: "pt",
+  german: "de",
+  italian: "it",
+  russian: "ru",
+  indonesian: "id",
+  japanese: "ja",
+  chinese: "zh",
+  korean: "ko",
+  turkish: "tr",
+  vietnamese: "vi",
+  thai: "th",
+  hindi: "hi",
+  polish: "pl",
+  dutch: "nl",
+};
+export function labelToLang(label: string) {
+  const word = (label || "")
+    .trim()
+    .split(/[\s(\[]/)[0]
+    .toLowerCase();
+  return {
+    lang: LANGS[word] || "und",
+    name: label || "Unknown",
+    kind: /signs|songs|forced/i.test(label)
+      ? "signs"
+      : /dubtitle/i.test(label)
+        ? "dubtitle"
+        : "full",
+  } as const;
+}
+export function normalizeSubtitles(
+  streamSubtitles: any[] = [],
+  topLevelSubtitles: any[] = [],
+  preferredLang = "en",
+) {
+  const map = new Map<string, any>();
+  for (const item of [...streamSubtitles, ...topLevelSubtitles]) {
+    if (!item?.url) continue;
+    const format = String(
+      item.format || item.url.split(/[?#]/)[0].split(".").pop() || "",
+    ).toLowerCase();
+    if (!["ass", "srt", "vtt"].includes(format)) continue;
+    const raw = String(item.language || item.label || "Unknown");
+    const meta = labelToLang(raw);
+    if (!map.has(item.url))
+      map.set(item.url, {
+        ...meta,
+        format,
+        upstreamUrl: item.url,
+        rawLabel: raw,
+      });
+  }
+  const grouped = new Map<string, number>();
+  const items = [...map.values()].sort(
+    (a, b) =>
+      Number(b.lang === preferredLang) - Number(a.lang === preferredLang) ||
+      Number(a.kind !== "full") - Number(b.kind !== "full"),
+  );
+  return items.map((item, i) => {
+    const n = (grouped.get(item.lang) || 0) + 1;
+    grouped.set(item.lang, n);
+    const hint = /sign/i.test(item.rawLabel)
+      ? " (Signs)"
+      : /song/i.test(item.rawLabel)
+        ? " (Songs)"
+        : /forced/i.test(item.rawLabel)
+          ? " (Forced)"
+          : n > 1
+            ? ` (${n})`
+            : "";
+    return {
+      ...item,
+      id: `sub-${i + 1}`,
+      label:
+        (item.lang === preferredLang ? "English" : item.rawLabel) +
+        hint +
+        (n > 1 && !hint ? ` (${n})` : ""),
+      default: i === 0 && item.kind === "full",
+    };
+  });
+}
