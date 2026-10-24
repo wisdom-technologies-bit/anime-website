@@ -1,0 +1,13 @@
+import assert from "node:assert/strict";
+const { classifyChunk, sniffContentType } = await import("../app/lib/proxy/sniff.ts");
+const ts = new Uint8Array(189); ts[0] = 0x47; ts[188] = 0x47;
+assert.equal(classifyChunk(new Uint8Array()), "unknown");
+assert.equal(classifyChunk(new Uint8Array([0x47])), "ts");
+assert.equal(classifyChunk(new Uint8Array([0xef,0xbb,0xbf,...new TextEncoder().encode("<!doctype html>")])), "html");
+assert.equal(classifyChunk(new TextEncoder().encode("<HTML><body>")), "html");
+assert.equal(classifyChunk(ts), "ts");
+const mp4 = new Uint8Array(8); mp4.set(new TextEncoder().encode("....ftyp"));
+assert.equal(classifyChunk(mp4), "fmp4");
+assert.equal(sniffContentType("ts"), "video/mp2t");
+assert.equal(sniffContentType("fmp4"), "video/mp4");
+console.log("PASS classifyChunk edge cases and MIME mapping");

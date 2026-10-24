@@ -61,7 +61,14 @@ async function resolveProvider(
       seen.add(stream.server);
       const headers = streamRequestHeaders(stream);
       const probe = await probeStream(stream, headers);
-      if (probe.ok) {
+      trace.push({
+        provider,
+        server: stream.server,
+        type: stream.type,
+        probe: probe.segments || null,
+        failures: probe.failures || 0,
+      });
+      if (probe.ok || (probe.unstable && !candidates.some((candidate: any) => candidate !== stream))) {
         trace.push({
           provider,
           ms: Date.now() - started,
@@ -110,7 +117,8 @@ export async function GET(
       .map((x) => x.trim())
       .filter(Boolean),
     refresh = url.searchParams.get("refresh") === "1",
-    debug = url.searchParams.get("debug") === "1";
+    debug = url.searchParams.get("debug") === "1",
+    requestedProvider = url.searchParams.get("provider");
   if (!id || !episode) return json({ error: "invalid_episode" }, 400);
   if (!["sub", "dub"].includes(audio))
     return json({ error: "invalid_audio" }, 400);
@@ -142,9 +150,9 @@ export async function GET(
       .maybeSingle());
   }
   if (!row) return json({ error: "episode_not_found" }, 404);
-  const providers = Array.isArray(row[`${audio}_providers`])
+  const providers = (Array.isArray(row[`${audio}_providers`])
     ? row[`${audio}_providers`]
-    : [];
+    : []).filter((p: any) => !requestedProvider || p.provider === requestedProvider);
   if (!providers.length) {
     const availableAudio = ["sub", "dub"].filter(
       (a) =>
@@ -237,8 +245,9 @@ export async function GET(
       result.url = await proxyUrl(
         stream.type === "hls" ? "manifest" : "segment",
         {
-          u: stream.type === "mp4" && winner.headers ? stream.url : stream.url,
+          u: stream.url,
           h: winner.headers,
+          ...(stream.type === "mp4" ? { f: "mp4" } : {}),
         },
       );
       result.subtitles = await Promise.all(
