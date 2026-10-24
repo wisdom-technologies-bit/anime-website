@@ -1,1 +1,1 @@
-export const ENABLE_MANGA = false;
+export const ENABLE_MANGA = true;
