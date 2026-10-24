@@ -70,7 +70,7 @@ export function requestMediasByTrendingSort() {
 }
 
 export const requestMediaById = () => `query($id: Int) { Media(id: $id) {
-  ${queryTitles} description(asHtml: true) isAdult status isFavourite ${queryMediaReviews}
+  ${queryTitles} description(asHtml: true) idMal isAdult status isFavourite ${queryMediaReviews}
   relations { nodes { id genres type format ${queryTitles} ${queryCoverImage} } }
   characters(sort: [ROLE, FAVOURITES_DESC]) { edges { role node { id name { full } image { large } } voiceActorRoles { voiceActor { id name { full } image { large } } } } }
   recommendations { edges { node { mediaRecommendation { id ${queryTitles} ${queryCoverImage} format genres seasonYear isAdult } } } }
