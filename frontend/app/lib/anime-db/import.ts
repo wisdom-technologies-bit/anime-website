@@ -11,13 +11,15 @@ export type ImportResult = { status: "ok"|"no_streams"|"not_found"|"error"; epis
 const strip = (s: any) => typeof s === "string" ? s.replace(/<[^>]*>/g, "").trim() : s ?? null;
 async function slot() { if (active < 3) { active++; return; } await new Promise<void>((r) => waiters.push(r)); active++; }
 function release() { active--; waiters.shift()?.(); }
-export async function importAnime(anilistId: number, options: { source:"open"|"queue"|"cron"; snapshot?: Snapshot; timeoutMs?: number }): Promise<ImportResult> {
+export async function importAnime(anilistId: number, options: { source:"open"|"queue"|"cron"; snapshot?: Snapshot; timeoutMs?: number; refreshMetadata?: boolean }): Promise<ImportResult> {
   if (!Number.isInteger(anilistId) || anilistId <= 0 || anilistId >= 1_000_000_000) return { status:"error", episodes:0, message:"Invalid AniList ID" };
   const existing = flights.get(anilistId); if (existing) return existing;
   const promise = (async () => { await slot(); try {
     const db: any = createAdminClient(); if (!db) return { status:"error", episodes:0, message:"Supabase admin client unavailable" };
     const { data: current } = await db.from("anime").select("*").eq("anilist_id", anilistId).maybeSingle();
-    const media = options.snapshot || await getMediaInfo({ id: anilistId });
+    const refreshMetadata = options.refreshMetadata ?? options.source === "open";
+    const recent = current?.updated_at && Date.now() - new Date(current.updated_at).getTime() < 3 * 86400000;
+    const media = options.snapshot || (refreshMetadata || !current || !recent ? await getMediaInfo({ id: anilistId }) : null);
     if (!media && !current) return { status:"error", episodes:0, message:"AniList metadata unavailable" };
     const title = media?.title || {}; const cover = media?.coverImage || {};
     if (media) { await db.from("anime").upsert({ anilist_id:anilistId, title:title.english || title.romaji || title.native || current?.title || String(anilistId), title_romaji:title.romaji ?? null, title_english:title.english ?? null, title_native:title.native ?? null, description:strip(media.description), cover_url:cover.extraLarge || cover.large || null, banner_url:media.bannerImage || null, format:media.format || null, status:media.status || null, season:media.season || null, season_year:media.seasonYear || null, total_episodes:media.episodes ?? current?.total_episodes ?? null, duration:media.duration ?? null, genres:media.genres || [], score:media.averageScore ?? null, is_adult:!!media.isAdult, mal_id:media.idMal ?? null }, { onConflict:"anilist_id" }); }
