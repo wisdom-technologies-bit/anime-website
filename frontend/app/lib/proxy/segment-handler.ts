@@ -1,153 +1,68 @@
 import { safeFetch } from "@/app/lib/proxy/upstream";
+import { classifyChunk, sniffContentType, type ChunkKind } from "@/app/lib/proxy/sniff";
 import type { ProxyPayload } from "@/app/lib/proxy/signing";
 
-const RETRY_STATUSES = new Set([403, 408, 425, 429]);
-const isRetryStatus = (status: number) =>
-  RETRY_STATUSES.has(status) || status >= 500;
-const isBlockChunk = (chunk: Uint8Array) => {
-  const text = new TextDecoder().decode(chunk).trimStart();
-  return (
-    text.startsWith("<!") ||
-    text.startsWith("<html") ||
-    text.startsWith("<HTML")
-  );
-};
 const sleep = (ms: number) => new Promise((resolve) => setTimeout(resolve, ms));
+const retryStatus = (status: number) => status === 403 || status === 429 || status >= 500;
 
-function streamWithFirstChunk(
-  reader: ReadableStreamDefaultReader<Uint8Array>,
-  first: Uint8Array,
-  bytes: { value: number },
-) {
+async function readProbe(reader: ReadableStreamDefaultReader<Uint8Array>) {
+  const parts: Uint8Array[] = [];
+  let total = 0;
+  while (total < 192) {
+    const next = await reader.read();
+    if (next.done) break;
+    parts.push(next.value);
+    total += next.value.byteLength;
+  }
+  const first = new Uint8Array(total);
+  let offset = 0;
+  for (const part of parts) { first.set(part, offset); offset += part.byteLength; }
+  return first;
+}
+
+function streamWithFirstChunk(reader: ReadableStreamDefaultReader<Uint8Array>, first: Uint8Array, bytes: { value: number }) {
   return new ReadableStream<Uint8Array>({
-    start(controller) {
-      controller.enqueue(first);
-      bytes.value += first.byteLength;
-    },
-    async pull(controller) {
-      try {
-        const next = await reader.read();
-        if (next.done) controller.close();
-        else {
-          bytes.value += next.value.byteLength;
-          controller.enqueue(next.value);
-        }
-      } catch {
-        controller.close();
-      }
-    },
-    cancel(reason) {
-      reader.cancel(reason).catch(() => undefined);
-    },
+    start(controller) { if (first.byteLength) { controller.enqueue(first); bytes.value += first.byteLength; } },
+    async pull(controller) { try { const next = await reader.read(); if (next.done) controller.close(); else { bytes.value += next.value.byteLength; controller.enqueue(next.value); } } catch { controller.close(); } },
+    cancel(reason) { reader.cancel(reason).catch(() => undefined); },
   });
 }
 
 export async function handleSegment(req: Request, payload: ProxyPayload) {
   const range = req.headers.get("range") || undefined;
   let lastStatus = 502;
-  let lastTimeout = false;
-  for (let attempt = 1; attempt <= 3; attempt++) {
-    if (attempt > 1) await sleep(Math.min(150 * 2 ** (attempt - 2), 2000));
-    const headers = { ...(payload.h || {}) };
-    if (attempt === 3) {
-      delete headers.origin;
-      headers["accept-encoding"] = "identity";
-    }
+  let timedOut = false;
+  for (let attempt = 1; attempt <= 2; attempt++) {
+    if (attempt === 2) await sleep(150);
     const started = Date.now();
-    let upstream: { response: Response; finalUrl: string };
     try {
-      upstream = await safeFetch(payload.u, {
-        headers,
-        range,
-        timeoutMs: 15000,
+      const upstream = await safeFetch(payload.u, { headers: payload.h || {}, range, timeoutMs: 1800 });
+      const response = upstream.response;
+      lastStatus = response.status;
+      let reader: ReadableStreamDefaultReader<Uint8Array> | undefined;
+      let first = new Uint8Array();
+      if (response.body) { reader = response.body.getReader(); first = await readProbe(reader); }
+      const kind: ChunkKind = classifyChunk(first);
+      const retry = retryStatus(response.status) || kind === "html";
+      if (retry && attempt < 2) { await reader?.cancel(); continue; }
+      if (retry) { await reader?.cancel(); continue; }
+      const headers = new Headers({
+        "cache-control": "private, max-age=0, must-revalidate",
+        "x-content-type-options": "nosniff",
+        "x-proxy-attempts": String(attempt),
+        "x-proxy-upstream-status": String(response.status),
       });
+      const detected = sniffContentType(kind);
+      const contentType = detected || (payload.f === "mp4" ? "video/mp4" : "application/octet-stream");
+      headers.set("content-type", contentType);
+      for (const name of ["content-range", "accept-ranges"]) if (response.headers.has(name)) headers.set(name, response.headers.get(name)!);
+      console.log(`[proxy-segment] host=${new URL(upstream.finalUrl).host} attempt=${attempt} status=${response.status} kind=${kind} ttfb=${Date.now() - started}`);
+      return new Response(reader ? streamWithFirstChunk(reader, first, { value: 0 }) : null, { status: response.status === 404 ? 502 : response.status, headers });
     } catch (error) {
-      lastTimeout =
-        error instanceof Error &&
-        (error.name === "AbortError" || /abort|timeout/i.test(error.message));
+      timedOut = error instanceof Error && (error.name === "AbortError" || /abort|timeout/i.test(error.message));
       lastStatus = 502;
-      console.log(
-        `[proxy-segment] host=${new URL(payload.u).host} attempt=${attempt} status=502 ct= ttfb=${Date.now() - started} bytes=0`,
-      );
-      continue;
+      if (attempt < 2) continue;
     }
-    const response = upstream.response;
-    const ct = response.headers.get("content-type") || "";
-    lastStatus = response.status;
-    let first: Uint8Array | undefined;
-    if (response.body) {
-      const reader = response.body.getReader();
-      const next = await reader.read();
-      if (!next.done) first = next.value;
-      else reader.releaseLock();
-      if (
-        first &&
-        (ct.toLowerCase().includes("text/html") || isBlockChunk(first))
-      ) {
-        await reader.cancel();
-        console.log(
-          `[proxy-segment] host=${new URL(upstream.finalUrl).host} attempt=${attempt} status=${response.status} ct=${ct} ttfb=${Date.now() - started} bytes=${first.byteLength}`,
-        );
-        continue;
-      }
-      if (isRetryStatus(response.status)) {
-        await reader.cancel();
-        console.log(
-          `[proxy-segment] host=${new URL(upstream.finalUrl).host} attempt=${attempt} status=${response.status} ct=${ct} ttfb=${Date.now() - started} bytes=${first?.byteLength || 0}`,
-        );
-        continue;
-      }
-      const bytes = { value: 0 };
-      const headersOut = new Headers();
-      for (const name of ["content-type", "content-range", "accept-ranges"])
-        if (response.headers.has(name))
-          headersOut.set(name, response.headers.get(name)!);
-      if (!headersOut.has("content-type"))
-        headersOut.set(
-          "content-type",
-          /\.(ts|m4s|key)(\?|$)/i.test(upstream.finalUrl)
-            ? "video/mp2t"
-            : "application/octet-stream",
-        );
-      headersOut.set("cache-control", "private, max-age=0, must-revalidate");
-      headersOut.set("x-proxy-attempts", String(attempt));
-      headersOut.set("x-proxy-upstream-status", String(response.status));
-      console.log(
-        `[proxy-segment] host=${new URL(upstream.finalUrl).host} attempt=${attempt} status=${response.status} ct=${ct} ttfb=${Date.now() - started} bytes=${response.headers.get("content-length") || first?.byteLength || 0}`,
-      );
-      return new Response(
-        first ? streamWithFirstChunk(reader, first, bytes) : null,
-        {
-          status: response.status === 404 ? 502 : response.status,
-          headers: headersOut,
-        },
-      );
-    }
-    console.log(
-      `[proxy-segment] host=${new URL(upstream.finalUrl).host} attempt=${attempt} status=${response.status} ct=${ct} ttfb=${Date.now() - started} bytes=0`,
-    );
-    if (
-      isRetryStatus(response.status) ||
-      ct.toLowerCase().includes("text/html")
-    )
-      continue;
-    const headersOut = new Headers({
-      "cache-control": "private, max-age=0, must-revalidate",
-      "x-proxy-attempts": String(attempt),
-      "x-proxy-upstream-status": String(response.status),
-    });
-    return new Response(response.body, {
-      status: response.status === 404 ? 502 : response.status,
-      headers: headersOut,
-    });
   }
-  const headers = new Headers({
-    "content-type": "text/plain; charset=utf-8",
-    "x-proxy-attempts": "3",
-    "x-proxy-upstream-status": String(lastStatus),
-  });
-  return new Response(
-    lastTimeout ? "upstream timeout" : "upstream blocked the request",
-    { status: 502, headers },
-  );
+  return new Response(timedOut ? "upstream timeout" : "upstream blocked the request", { status: 502, headers: { "content-type": "text/plain; charset=utf-8", "x-content-type-options": "nosniff", "x-proxy-attempts": "2", "x-proxy-upstream-status": String(lastStatus) } });
 }

@@ -30,10 +30,10 @@ const HLS_CONFIG = {
   lowLatencyMode: false,
   fragLoadPolicy: {
     default: {
-      maxTimeToFirstByteMs: 10000,
+      maxTimeToFirstByteMs: 4000,
       maxLoadTimeMs: 60000,
-      timeoutRetry: { maxNumRetry: 4, retryDelayMs: 0, maxRetryDelayMs: 0 },
-      errorRetry: { maxNumRetry: 1, retryDelayMs: 250, maxRetryDelayMs: 1000 },
+      timeoutRetry: { maxNumRetry: 0, retryDelayMs: 0, maxRetryDelayMs: 0 },
+      errorRetry: { maxNumRetry: 1, retryDelayMs: 0, maxRetryDelayMs: 0 },
     },
   },
   playlistLoadPolicy: {
@@ -88,6 +88,7 @@ export default function VideoPlayer({
   const [retry, setRetry] = useState(0);
   const [waiting, setWaiting] = useState(false);
   const [playing, setPlaying] = useState(false);
+  const excludedProvidersRef = useRef(new Set<string>());
   const [excludedProvider, setExcludedProvider] = useState("");
   const [skipRanges, setSkipRanges] = useState<any>(null);
   const [visibleSkip, setVisibleSkip] = useState<any>(null);
@@ -103,7 +104,7 @@ export default function VideoPlayer({
       .catch(() => undefined);
     setData(null);
     fetch(
-      `/api/watch/${anilistId}/${episode}?audio=${audio}&sublang=${encodeURIComponent(subtitleLanguage)}${excludedProvider ? `&exclude=${encodeURIComponent(excludedProvider)}` : ""}${provider ? `&provider=${encodeURIComponent(provider)}` : ""}`,
+      `/api/watch/${anilistId}/${episode}?audio=${audio}&sublang=${encodeURIComponent(subtitleLanguage)}${excludedProvidersRef.current.size ? `&exclude=${encodeURIComponent([...excludedProvidersRef.current].join(","))}` : ""}${provider ? `&provider=${encodeURIComponent(provider)}` : ""}`,
       { signal: controller.signal },
     )
       .then(async (response) => {
@@ -212,7 +213,11 @@ export default function VideoPlayer({
       if (!details?.fatal) return;
       if (details.type === "networkError" && !recoveryRef.current.switched) {
         recoveryRef.current.switched = true;
-        setExcludedProvider(data?.provider || "");
+        const failedProvider = data?.provider || "";
+        if (failedProvider) excludedProvidersRef.current.add(failedProvider);
+        void fetch("/api/watch/report", { method: "POST", headers: { "content-type": "application/json" }, body: JSON.stringify({ anilistId, episode, audio, provider: failedProvider, reason: "blocked" }) }).catch(() => undefined);
+        setExcludedProvider(failedProvider);
+        setWaiting(true);
         setRetry((value) => value + 1);
         return;
       }
@@ -229,7 +234,11 @@ export default function VideoPlayer({
       }
       if (!recoveryRef.current.switched) {
         recoveryRef.current.switched = true;
-        setExcludedProvider(data?.provider || "");
+        const failedProvider = data?.provider || "";
+        if (failedProvider) excludedProvidersRef.current.add(failedProvider);
+        void fetch("/api/watch/report", { method: "POST", headers: { "content-type": "application/json" }, body: JSON.stringify({ anilistId, episode, audio, provider: failedProvider, reason: "blocked" }) }).catch(() => undefined);
+        setExcludedProvider(failedProvider);
+        setWaiting(true);
         setRetry((value) => value + 1);
         return;
       }
