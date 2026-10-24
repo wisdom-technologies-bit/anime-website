@@ -21,14 +21,14 @@ export async function handleSegment(req: Request, payload: ProxyPayload) {
   const range = req.headers.get("range") || undefined;
   let lastStatus = 502;
   let lastTimeout = false;
-  for (let attempt = 1; attempt <= 5; attempt++) {
-    if (attempt > 1) await sleep(attempt === 2 ? 150 : attempt === 3 ? 400 : 800);
+  for (let attempt = 1; attempt <= 8; attempt++) {
+    if (attempt > 1) await sleep(Math.min(150 * 2 ** (attempt - 2), 2000));
     const headers = { ...(payload.h || {}) };
     if (attempt === 3) { delete headers.origin; headers["accept-encoding"] = "identity"; }
     const started = Date.now();
     let upstream: { response: Response; finalUrl: string };
     try {
-      upstream = await safeFetch(payload.u, { headers, range, timeoutMs: 8000 });
+      upstream = await safeFetch(payload.u, { headers, range, timeoutMs: 15000 });
     } catch (error) {
       lastTimeout = error instanceof Error && (error.name === "AbortError" || /abort|timeout/i.test(error.message));
       lastStatus = 502;
@@ -47,6 +47,6 @@ export async function handleSegment(req: Request, payload: ProxyPayload) {
     const headersOut = new Headers({ "cache-control": "private, max-age=0, must-revalidate", "x-proxy-attempts": String(attempt), "x-proxy-upstream-status": String(response.status) });
     return new Response(response.body, { status: response.status === 404 ? 502 : response.status, headers: headersOut });
   }
-  const headers = new Headers({ "content-type": "text/plain; charset=utf-8", "x-proxy-attempts": "5", "x-proxy-upstream-status": String(lastStatus) });
+  const headers = new Headers({ "content-type": "text/plain; charset=utf-8", "x-proxy-attempts": "8", "x-proxy-upstream-status": String(lastStatus) });
   return new Response(lastTimeout ? "upstream timeout" : "upstream blocked the request", { status: 502, headers });
 }
