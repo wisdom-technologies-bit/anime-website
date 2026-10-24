@@ -294,3 +294,10 @@
     margin: 32px 0;
 
 }
+
+.episode_list { display: grid; grid-template-columns: repeat(auto-fill, minmax(220px, 1fr)); gap: 16px; margin: 16px 0; }
+.episode_card { display: flex; gap: 12px; color: var(--white-100); text-decoration: none; background: var(--white-05); padding: 8px; border-radius: 6px; }
+.episode_card img { width: 96px; height: 64px; object-fit: cover; border-radius: 4px; }
+.episode_card div { min-width: 0; display: flex; flex-direction: column; gap: 4px; }
+.episode_card span { overflow: hidden; text-overflow: ellipsis; white-space: nowrap; color: var(--white-75); }
+.episode_card b { display: inline-block; margin-right: 6px; color: var(--brand-color); font-size: var(--font-size--small-1); }

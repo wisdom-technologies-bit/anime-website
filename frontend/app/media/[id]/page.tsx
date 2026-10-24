@@ -14,6 +14,10 @@ import PageHeading from "./components/PageHeading";
 import Reviews from "./components/Reviews";
 import { getMediaInfo } from "@/app/lib/anilist/medias.server";
 import { notFound } from "next/navigation";
+import { Suspense } from "react";
+import EpisodesSection from "./components/EpisodesSection";
+
+export const maxDuration = 60;
 
 export async function generateMetadata({ params }: { params: { id: number } }) {
   const mediaData = await getMediaInfo({ id: Number(params.id) });
@@ -193,9 +197,11 @@ export default async function MediaPage({
               </section>
             )}
 
-            {mediaInfo.type == "ANIME" && mediaInfo.format != "MOVIE" && (
+            {mediaInfo.type == "ANIME" && (
               <section id={styles.episodes_container}>
-                <p>Episodes are being prepared. Check back soon.</p>
+                <Suspense fallback={<p>Episodes are being prepared. Check back soon.</p>}>
+                  <EpisodesSection anilistId={Number(params.id)} format={mediaInfo.format} cover={mediaInfo.coverImage.extraLarge || mediaInfo.coverImage.large} />
+                </Suspense>
               </section>
             )}
 
