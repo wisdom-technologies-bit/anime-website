@@ -9,7 +9,6 @@
 - `app/layout/header/components/NewsNavListHover/*`
 - `app/api/consumet/consumetNews.ts`
 - `app/ts/interfaces/newsInterface.d.ts`
-- `app/api/wrong-media-enabled/route.ts`
 - `app/api/consumet/consumetImdb.ts`
 
 ## Remaining external references

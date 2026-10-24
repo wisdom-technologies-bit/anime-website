@@ -2,9 +2,14 @@ import React from "react";
 import styles from "./component.module.css";
 import Link from "next/link";
 import Image from "next/image";
+import dynamic from "next/dynamic";
 import { MediaData } from "@/app/ts/interfaces/anilistMediaData";
 import parse from "html-react-parser";
-import * as AddToPlaylist from "../../Buttons/AddToFavourites";
+
+const AddToPlaylistButton = dynamic(
+  () => import("../../Buttons/AddToFavourites").then((module) => module.Button),
+  { ssr: false },
+);
 
 export function Container({
   children,
@@ -70,7 +75,7 @@ export function Buttons({
         {mediaFormat == "MANGA" ? "READ" : "WATCH"} NOW
       </Link>
 
-      <AddToPlaylist.Button mediaInfo={media} />
+      <AddToPlaylistButton mediaInfo={media} />
     </div>
   );
 }
