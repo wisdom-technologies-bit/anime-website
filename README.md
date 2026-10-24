@@ -1,6 +1,6 @@
 <h1 align="center">KumoriTV</h1>
 
-![KumoriTV Website Logo](/logo.svg)
+![KumoriTV Website Logo](/og-image.png)
 
 Project of animes and mangas website, utilizing the AniList, Consumet and Aniwatch API, which has info of animes and mangas released, data of the cast of that media, and many other things.
 
