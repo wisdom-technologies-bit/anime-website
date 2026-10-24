@@ -33,15 +33,23 @@ export default function WatchControls({
   const [provider, setProvider] = useState("auto");
   const [availableServers, setAvailableServers] = useState(servers);
   const [status, setStatus] = useState("");
+  const [requestFailed, setRequestFailed] = useState(false);
   useEffect(() => {
     let cancelled = false;
     fetch(`/api/watch/${anilistId}/${episode}?audio=${audio}`)
       .then((response) => (response.ok ? response.json() : null))
       .then((body) => {
-        if (!cancelled && Array.isArray(body?.servers))
+        if (cancelled) return;
+        if (Array.isArray(body?.servers)) {
           setAvailableServers(body.servers);
+          setRequestFailed(false);
+        } else {
+          setRequestFailed(true);
+        }
       })
-      .catch(() => undefined);
+      .catch(() => {
+        if (!cancelled) setRequestFailed(true);
+      });
     return () => {
       cancelled = true;
     };
@@ -101,13 +109,20 @@ export default function WatchControls({
         display: "flex",
         flexWrap: "wrap",
         alignItems: "center",
-        gap: 8,
-        padding: "10px 0",
+        gap: "8px 16px",
+        padding: "8px 16px",
+        minHeight: 44,
+        width: "96%",
+        margin: "16px auto 0",
+        background: "var(--white-05)",
         fontSize: 13,
       }}
     >
       {episode > 1 ? (
-        <Link href={`/watch/${anilistId}?ep=${episode - 1}&audio=${audio}`}>
+        <Link
+          data-testid="watch-prev"
+          href={`/watch/${anilistId}?ep=${episode - 1}&audio=${audio}`}
+        >
           Prev
         </Link>
       ) : (
@@ -120,11 +135,14 @@ export default function WatchControls({
           Next
         </button>
       ) : (
-        <Link href={`/watch/${anilistId}?ep=${episode + 1}&audio=${audio}`}>
+        <Link
+          data-testid="watch-next"
+          href={`/watch/${anilistId}?ep=${episode + 1}&audio=${audio}`}
+        >
           Next
         </Link>
       )}
-      <span role="group" aria-label="Audio">
+      <span data-testid="watch-audio-toggle" role="group" aria-label="Audio">
         <Link
           aria-disabled={!availableAudio.sub}
           href={
@@ -149,6 +167,7 @@ export default function WatchControls({
       <label>
         Server{" "}
         <select
+          data-testid="watch-server-select"
           aria-label="Server selector"
           value={provider}
           onChange={(event) => choose(event.target.value)}
@@ -165,6 +184,7 @@ export default function WatchControls({
       </label>
       <label>
         <input
+          data-testid="watch-auto-skip"
           type="checkbox"
           checked={autoSkip}
           onChange={(event) =>
@@ -175,6 +195,7 @@ export default function WatchControls({
       </label>
       <label>
         <input
+          data-testid="watch-auto-next"
           type="checkbox"
           checked={autoNext}
           onChange={(event) =>
@@ -191,11 +212,17 @@ export default function WatchControls({
         Try next server
       </button>
       <small>
-        {status ||
+        {requestFailed ? (
+          <button type="button" onClick={() => setRequestFailed(false)}>
+            Retry
+          </button>
+        ) : (
+          status ||
           (provider === "auto"
             ? "Auto"
             : availableServers.find((server) => server.id === provider)
-                ?.label || provider)}
+                ?.label || provider)
+        )}
       </small>
     </div>
   );
