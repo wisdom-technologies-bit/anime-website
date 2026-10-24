@@ -1,2 +1,69 @@
 import { DEFAULT_UA } from "./headers";
-export async function probeStream(stream: any, headers: Record<string,string>, options: { timeoutMs?: number } = {}) { if (stream.type === "embed") return { ok:true, embedOnly:true }; const controller=new AbortController(); const timer=setTimeout(()=>controller.abort(), options.timeoutMs ?? 12000); try { const init={ redirect:"follow" as RequestRedirect, headers:{...headers, ...(stream.type === "mp4" ? {range:"bytes=0-1"} : {})}, signal:controller.signal }; const response=await fetch(stream.url, init); const type=response.headers.get("content-type")||""; if (stream.type === "mp4") return response.ok && (response.status===200||response.status===206) && (/^video\//i.test(type)||/octet-stream/i.test(type)) ? {ok:true,finalUrl:response.url} : {ok:false,reason:"invalid_mp4"}; const text=await response.text(); if (!response.ok || !text.trimStart().startsWith("#EXTM3U")) return {ok:false,reason:"invalid_hls"}; let media=text; let finalUrl=response.url; if (text.includes("#EXT-X-STREAM-INF")) { const line=text.split(/\r?\n/).find((x)=>x && !x.startsWith("#")); if (!line) return {ok:false,reason:"no_variant"}; finalUrl=new URL(line, response.url).toString(); const variant=await fetch(finalUrl,{...init,headers}); media=await variant.text(); if (!variant.ok || !media.includes("#EXTINF")) return {ok:false,reason:"invalid_variant"}; } const segment=media.split(/\r?\n/).find((x)=>x && !x.startsWith("#")); if (!segment) return {ok:false,reason:"no_segment"}; const segmentResponse=await fetch(new URL(segment, finalUrl),{...init,headers:{...headers,range:"bytes=0-1023"}}); const segmentType=segmentResponse.headers.get("content-type")||""; return (segmentResponse.status===200||segmentResponse.status===206) && !/text\/html/i.test(segmentType) ? {ok:true,kind:text.includes("#EXT-X-STREAM-INF")?"master":"media"} : {ok:false,reason:"invalid_segment"}; } catch(error) { return {ok:false,reason:error instanceof Error && error.name === "AbortError" ? "timeout" : "network_error"}; } finally { clearTimeout(timer); } }
+export async function probeStream(
+  stream: any,
+  headers: Record<string, string>,
+  options: { timeoutMs?: number } = {},
+) {
+  if (stream.type === "embed") return { ok: true, embedOnly: true };
+  const controller = new AbortController();
+  const timer = setTimeout(
+    () => controller.abort(),
+    options.timeoutMs ?? 12000,
+  );
+  try {
+    const init = {
+      redirect: "follow" as RequestRedirect,
+      headers: {
+        ...headers,
+        ...(stream.type === "mp4" ? { range: "bytes=0-1" } : {}),
+      },
+      signal: controller.signal,
+    };
+    const response = await fetch(stream.url, init);
+    const type = response.headers.get("content-type") || "";
+    if (stream.type === "mp4")
+      return response.ok &&
+        (response.status === 200 || response.status === 206) &&
+        (/^video\//i.test(type) || /octet-stream/i.test(type))
+        ? { ok: true, finalUrl: response.url }
+        : { ok: false, reason: "invalid_mp4" };
+    const text = await response.text();
+    if (!response.ok || !text.trimStart().startsWith("#EXTM3U"))
+      return { ok: false, reason: "invalid_hls" };
+    let media = text;
+    let finalUrl = response.url;
+    if (text.includes("#EXT-X-STREAM-INF")) {
+      const line = text.split(/\r?\n/).find((x) => x && !x.startsWith("#"));
+      if (!line) return { ok: false, reason: "no_variant" };
+      finalUrl = new URL(line, response.url).toString();
+      const variant = await fetch(finalUrl, { ...init, headers });
+      media = await variant.text();
+      if (!variant.ok || !media.includes("#EXTINF"))
+        return { ok: false, reason: "invalid_variant" };
+    }
+    const segment = media.split(/\r?\n/).find((x) => x && !x.startsWith("#"));
+    if (!segment) return { ok: false, reason: "no_segment" };
+    const segmentResponse = await fetch(new URL(segment, finalUrl), {
+      ...init,
+      headers: { ...headers, range: "bytes=0-1023" },
+    });
+    const segmentType = segmentResponse.headers.get("content-type") || "";
+    return (segmentResponse.status === 200 || segmentResponse.status === 206) &&
+      !/text\/html/i.test(segmentType)
+      ? {
+          ok: true,
+          kind: text.includes("#EXT-X-STREAM-INF") ? "master" : "media",
+        }
+      : { ok: false, reason: "invalid_segment" };
+  } catch (error) {
+    return {
+      ok: false,
+      reason:
+        error instanceof Error && error.name === "AbortError"
+          ? "timeout"
+          : "network_error",
+    };
+  } finally {
+    clearTimeout(timer);
+  }
+}
