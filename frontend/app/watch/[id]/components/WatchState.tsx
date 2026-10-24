@@ -24,6 +24,7 @@ type WatchData = {
   subtitles?: any[];
   hardsub?: boolean;
   thumbnails?: any;
+  availableAudio?: { sub?: boolean; dub?: boolean };
 };
 type State = {
   audio: "sub" | "dub";

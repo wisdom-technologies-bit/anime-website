@@ -72,9 +72,8 @@ export default function WatchControls({
           className={`${styles.button} ${audio === "sub" ? styles.selected : ""}`}
           aria-pressed={audio === "sub"}
           disabled={!state.availableAudio.sub}
-          title={
-            !state.availableAudio.sub ? "Subtitles unavailable" : undefined
-          }
+          title={!state.availableAudio.sub ? "Subtitles unavailable" : undefined}
+          onClick={() => { if (state.availableAudio.sub) window.location.href = `/watch/${anilistId}?ep=${episode}&audio=sub`; }}
         >
           SUB
         </button>
@@ -83,6 +82,7 @@ export default function WatchControls({
           aria-pressed={audio === "dub"}
           disabled={!state.availableAudio.dub}
           title={!state.availableAudio.dub ? "Dub unavailable" : undefined}
+          onClick={() => { if (state.availableAudio.dub) window.location.href = `/watch/${anilistId}?ep=${episode}&audio=dub`; }}
         >
           DUB
         </button>
