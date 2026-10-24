@@ -1,32 +1,4 @@
-import { notFound } from "next/navigation";
-import { cookies } from "next/headers";
-import React from "react";
-import styles from "./page.module.css";
-import * as MediaCardExpanded from "@/app/components/MediaCards/MediaInfoExpandedWithCover";
-import { MediaData } from "@/app/ts/interfaces/anilistMediaData";
-import { getMediaInfo } from "@/app/lib/anilist/medias.server";
-
-export async function generateMetadata({ params }: { params: { id: number } }) {
-  const mediaInfo = await getMediaInfo({ id: Number(params.id) });
-  if (!mediaInfo) return { title: "Not Found | KumoriTV" };
-  return { title: `Watch ${mediaInfo.title.userPreferred} | KumoriTV`, description: `Watch ${mediaInfo.title.userPreferred} on KumoriTV.` };
-}
-
-export default async function WatchEpisode({ params }: { params: { id: number } }) {
-  cookies();
-  const mediaInfo = await getMediaInfo({ id: Number(params.id) });
-  if (!mediaInfo) notFound();
-  return (
-    <main id={styles.container}>
-      <section id={styles.media_info_container}>
-        <div id={styles.heading_info_container}>
-          <h1>{mediaInfo.title.userPreferred}</h1>
-          <MediaCardExpanded.Container mediaInfo={mediaInfo as MediaData}>
-            <MediaCardExpanded.Description description={mediaInfo.description} />
-          </MediaCardExpanded.Container>
-          <p>Streaming is being set up for KumoriTV. Check back soon.</p>
-        </div>
-      </section>
-    </main>
-  );
-}
+import {notFound} from "next/navigation"; import {cookies} from "next/headers"; import styles from "./page.module.css"; import * as MediaCardExpanded from "@/app/components/MediaCards/MediaInfoExpandedWithCover"; import {getMediaInfo} from "@/app/lib/anilist/medias.server"; import VideoPlayer from "./components/VideoPlayer"; import EpisodesListContainer from "./components/EpisodesListContainer";
+function clean(s:string|null|undefined){return (s||"").replace(/<[^>]*>/g,"").trim()}
+export async function generateMetadata({params,searchParams}:{params:{id:string};searchParams:{ep?:string}}){const media=await getMediaInfo({id:Number(params.id)});if(!media)return {title:"Not Found | KumoriTV"};const ep=Number(searchParams.ep||1);return {title:media.format==="MOVIE"?`Watch ${media.title.userPreferred} | KumoriTV`:`Episode ${ep} - ${media.title.userPreferred} | KumoriTV`,description:clean(media.description)}}
+export default async function WatchPage({params,searchParams}:{params:{id:string};searchParams:{ep?:string;episode?:string;audio?:string;dub?:string;t?:string}}){const media=await getMediaInfo({id:Number(params.id)});if(!media)notFound();const ep=media.format==="MOVIE"?1:Number(searchParams.ep||searchParams.episode||1);const audio=searchParams.audio||(searchParams.dub==="true"?"dub":"sub");const lang=cookies().get("subtitle_language")?.value||"English";return <main id={styles.container}><section className={styles.background}><div id={styles.video_container}><VideoPlayer anilistId={Number(params.id)} episode={ep} audio={audio as "sub"|"dub"} subtitleLanguage={lang} initialTime={Number(searchParams.t||0)} title={media.title.userPreferred}/></div></section><section id={styles.media_info_container}><div id={styles.heading_info_container}><h1>{media.title.userPreferred}</h1><MediaCardExpanded.Container mediaInfo={media as any}><MediaCardExpanded.Description description={media.description}/></MediaCardExpanded.Container></div><EpisodesListContainer mediaId={Number(params.id)} activeEpisodeNumber={ep} audio={audio as "sub"|"dub"} nextAiringEpisodeInfo={media.nextAiringEpisode||undefined}/></section></main>}
