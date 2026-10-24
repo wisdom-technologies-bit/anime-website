@@ -1,0 +1,1 @@
+process.env.PROXY_SIGNING_SECRET='test-signing-secret-please-change'; const {filterForwardHeaders}=await import('../app/lib/proxy/upstream.ts'); const h=filterForwardHeaders({Referer:'x',Cookie:'secret',Origin:'o'}); if(h.cookie||h.referer!=='x'||h.origin!=='o')throw Error('header filter'); console.log('PASS upstream header filtering');
