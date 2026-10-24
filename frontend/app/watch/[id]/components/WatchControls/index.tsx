@@ -1,228 +1,182 @@
 "use client";
-
 import Link from "next/link";
 import { useEffect, useState } from "react";
-
-type Props = {
-  anilistId: number;
-  episode: number;
-  audio: "sub" | "dub";
-  episodeCount?: number | null;
-  availableAudio?: { sub?: boolean; dub?: boolean };
-  servers?: Array<{
-    id: string;
-    label: string;
-    type: string;
-    healthy: boolean;
-    hardsub: boolean;
-  }>;
-  onProviderChange?: (provider: string) => void;
-};
-
+import styles from "./component.module.css";
+import { useWatchState } from "../WatchState";
 export default function WatchControls({
   anilistId,
   episode,
   audio,
   episodeCount,
-  availableAudio = { sub: true, dub: true },
-  servers = [],
-  onProviderChange,
-}: Props) {
+}: {
+  anilistId: number;
+  episode: number;
+  audio: "sub" | "dub";
+  episodeCount?: number | null;
+}) {
+  const state = useWatchState();
   const [autoSkip, setAutoSkip] = useState(false);
   const [autoNext, setAutoNext] = useState(true);
-  const [provider, setProvider] = useState("auto");
-  const [availableServers, setAvailableServers] = useState(servers);
-  const [status, setStatus] = useState("");
-  const [requestFailed, setRequestFailed] = useState(false);
-  useEffect(() => {
-    let cancelled = false;
-    fetch(`/api/watch/${anilistId}/${episode}?audio=${audio}`)
-      .then((response) => (response.ok ? response.json() : null))
-      .then((body) => {
-        if (cancelled) return;
-        if (Array.isArray(body?.servers)) {
-          setAvailableServers(body.servers);
-          setRequestFailed(false);
-        } else {
-          setRequestFailed(true);
-        }
-      })
-      .catch(() => {
-        if (!cancelled) setRequestFailed(true);
-      });
-    return () => {
-      cancelled = true;
-    };
-  }, [anilistId, episode, audio]);
   useEffect(() => {
     try {
-      setProvider(
-        localStorage.getItem(`kumori_server_pref_v1:${anilistId}:${audio}`) ||
-          "auto",
-      );
       setAutoSkip(localStorage.getItem("autoSkip") === "true");
       setAutoNext(localStorage.getItem("autoNext") !== "false");
     } catch {}
-  }, [anilistId, audio]);
-  const choose = (value: string) => {
-    setProvider(value);
-    try {
-      const key = `kumori_server_pref_v1:${anilistId}:${audio}`;
-      value === "auto"
-        ? localStorage.removeItem(key)
-        : localStorage.setItem(key, value);
-    } catch {}
-    onProviderChange?.(value === "auto" ? "" : value);
-  };
-  const next = availableServers.find(
-    (server) => server.id !== provider && server.healthy,
+  }, []);
+  const languages = Array.from(
+    new Map(state.subtitles.map((x: any) => [x.label || x.lang, x])).values(),
   );
-  const reportAndChoose = (serverId: string) => {
-    void fetch("/api/watch/report", {
-      method: "POST",
-      headers: { "content-type": "application/json" },
-      body: JSON.stringify({
-        anilistId,
-        episode,
-        audio,
-        provider: provider === "auto" ? serverId : provider,
-        reason: "network",
-      }),
-    }).catch(() => undefined);
-    choose(serverId);
-    setStatus("Switching server...");
-  };
   const setPref = (
     key: string,
     value: boolean,
-    setter: (value: boolean) => void,
+    setter: (v: boolean) => void,
   ) => {
     setter(value);
     try {
       localStorage.setItem(key, String(value));
     } catch {}
   };
+  const next = state.servers.find(
+    (x) => x.id !== state.activeProvider && x.healthy !== false,
+  );
   return (
-    <div
-      data-testid="watch-controls"
-      style={{
-        display: "flex",
-        flexWrap: "wrap",
-        alignItems: "center",
-        gap: "8px 16px",
-        padding: "8px 16px",
-        minHeight: 44,
-        width: "96%",
-        margin: "16px auto 0",
-        background: "var(--white-05)",
-        fontSize: 13,
-      }}
-    >
+    <div className={styles.wrapper} data-testid="watch-controls">
       {episode > 1 ? (
         <Link
+          className={styles.button}
           data-testid="watch-prev"
           href={`/watch/${anilistId}?ep=${episode - 1}&audio=${audio}`}
         >
-          Prev
+          ‹ Prev
         </Link>
       ) : (
-        <button disabled type="button">
-          Prev
+        <button className={styles.button} disabled>
+          ‹ Prev
         </button>
       )}
       {episodeCount && episode >= episodeCount ? (
-        <button disabled type="button">
-          Next
+        <button className={styles.button} disabled>
+          Next ›
         </button>
       ) : (
         <Link
+          className={styles.button}
           data-testid="watch-next"
           href={`/watch/${anilistId}?ep=${episode + 1}&audio=${audio}`}
         >
-          Next
+          Next ›
         </Link>
       )}
-      <span data-testid="watch-audio-toggle" role="group" aria-label="Audio">
-        <Link
-          aria-disabled={!availableAudio.sub}
-          href={
-            availableAudio.sub
-              ? `/watch/${anilistId}?ep=${episode}&audio=sub`
-              : "#"
+      <div className={styles.segment} role="group" aria-label="Audio">
+        <button
+          className={`${styles.button} ${audio === "sub" ? styles.selected : ""}`}
+          aria-pressed={audio === "sub"}
+          disabled={!state.availableAudio.sub}
+          title={
+            !state.availableAudio.sub ? "Subtitles unavailable" : undefined
           }
         >
           SUB
-        </Link>
-        <Link
-          aria-disabled={!availableAudio.dub}
-          href={
-            availableAudio.dub
-              ? `/watch/${anilistId}?ep=${episode}&audio=dub`
-              : "#"
-          }
+        </button>
+        <button
+          className={`${styles.button} ${audio === "dub" ? styles.selected : ""}`}
+          aria-pressed={audio === "dub"}
+          disabled={!state.availableAudio.dub}
+          title={!state.availableAudio.dub ? "Dub unavailable" : undefined}
         >
           DUB
-        </Link>
-      </span>
-      <label>
-        Server{" "}
+        </button>
+      </div>
+      <label className={styles.label}>
+        Server
         <select
+          className={styles.select}
           data-testid="watch-server-select"
           aria-label="Server selector"
-          value={provider}
-          onChange={(event) => choose(event.target.value)}
+          value={state.selectedServer}
+          onChange={(e) => state.selectServer(e.target.value)}
         >
           <option value="auto">Auto</option>
-          {availableServers.map((server) => (
+          {state.servers.map((server: any) => (
             <option key={server.id} value={server.id}>
-              {server.label}
+              {server.label || `Server ${server.id}`}
               {server.type === "embed" ? " (embed)" : ""}
-              {!server.healthy ? " — unstable" : ""}
+              {server.healthy === false ? " (unstable)" : ""}
             </option>
           ))}
         </select>
       </label>
-      <label>
+      <label className={styles.label}>
+        Subtitles
+        <select
+          className={styles.select}
+          aria-label="Subtitles"
+          value={state.subtitleLanguage}
+          onChange={(e) => state.setSubtitleLanguage(e.target.value)}
+        >
+          <option value="Off">Off</option>
+          {languages.map((x: any) => (
+            <option key={x.label || x.lang} value={x.label || x.lang}>
+              {x.label || x.lang}
+            </option>
+          ))}
+        </select>
+      </label>
+      <span className={styles.sync}>
+        <span>Sync {state.offset.toFixed(1)}s</span>
+        <button
+          className={styles.button}
+          onClick={() => state.setOffset(state.offset - 0.5)}
+        >
+          -0.5s
+        </button>
+        <button
+          className={styles.button}
+          onClick={() => state.setOffset(state.offset + 0.5)}
+        >
+          +0.5s
+        </button>
+      </span>
+      <label className={styles.label}>
         <input
+          className={styles.check}
           data-testid="watch-auto-skip"
           type="checkbox"
           checked={autoSkip}
-          onChange={(event) =>
-            setPref("autoSkip", event.target.checked, setAutoSkip)
-          }
-        />{" "}
+          onChange={(e) => setPref("autoSkip", e.target.checked, setAutoSkip)}
+        />
         Auto Skip
       </label>
-      <label>
+      <label className={styles.label}>
         <input
+          className={styles.check}
           data-testid="watch-auto-next"
           type="checkbox"
           checked={autoNext}
-          onChange={(event) =>
-            setPref("autoNext", event.target.checked, setAutoNext)
-          }
-        />{" "}
+          onChange={(e) => setPref("autoNext", e.target.checked, setAutoNext)}
+        />
         Auto Next
       </label>
       <button
-        type="button"
+        className={`${styles.button} ${styles.secondary}`}
         disabled={!next}
-        onClick={() => next && reportAndChoose(next.id)}
+        onClick={() => state.tryNextServer("network")}
       >
         Try next server
       </button>
-      <small>
-        {requestFailed ? (
-          <button type="button" onClick={() => setRequestFailed(false)}>
-            Retry
-          </button>
-        ) : (
-          status ||
-          (provider === "auto"
-            ? "Auto"
-            : availableServers.find((server) => server.id === provider)
-                ?.label || provider)
-        )}
+      {state.status === "error" && (
+        <button className={styles.linkButton} onClick={state.retry}>
+          Retry
+        </button>
+      )}
+      <small className={styles.status}>
+        {state.status === "loading"
+          ? "Loading..."
+          : state.status === "error"
+            ? state.errorMessage
+            : state.hardsub
+              ? "Subtitles are built into this server"
+              : `Server ${state.activeProvider || "Auto"}`}
       </small>
     </div>
   );
