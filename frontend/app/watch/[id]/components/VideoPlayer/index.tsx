@@ -9,7 +9,7 @@ import styles from "./component.module.css";
 import { getProgress, saveProgress, shouldResume } from "@/app/lib/local-store/progress";
 import { normalizeSubtitles } from "@/app/lib/watch/subtitles";
 
-const HLS_CONFIG = { capLevelToPlayerSize: true, startLevel: -1, abrEwmaDefaultEstimate: 500000, abrBandWidthFactor: 0.8, abrBandWidthUpFactor: 0.6, maxBufferLength: 40, maxMaxBufferLength: 90, backBufferLength: 30, fragLoadingMaxRetry: 6, fragLoadingRetryDelay: 1000, manifestLoadingMaxRetry: 4, levelLoadingMaxRetry: 4, enableWorker: true, lowLatencyMode: false };
+const HLS_CONFIG = { capLevelToPlayerSize: true, startLevel: -1, maxBufferLength: 60, maxMaxBufferLength: 120, backBufferLength: 30, enableWorker: true, lowLatencyMode: false, fragLoadPolicy: { default: { maxTimeToFirstByteMs: 10000, maxLoadTimeMs: 60000, timeoutRetry: { maxNumRetry: 4, retryDelayMs: 0, maxRetryDelayMs: 0 }, errorRetry: { maxNumRetry: 8, retryDelayMs: 500, maxRetryDelayMs: 4000 } } }, playlistLoadPolicy: { default: { maxTimeToFirstByteMs: 10000, maxLoadTimeMs: 60000, timeoutRetry: { maxNumRetry: 4, retryDelayMs: 0, maxRetryDelayMs: 0 }, errorRetry: { maxNumRetry: 4, retryDelayMs: 500, maxRetryDelayMs: 4000 } } }, manifestLoadPolicy: { default: { maxTimeToFirstByteMs: 10000, maxLoadTimeMs: 60000, timeoutRetry: { maxNumRetry: 4, retryDelayMs: 0, maxRetryDelayMs: 0 }, errorRetry: { maxNumRetry: 4, retryDelayMs: 500, maxRetryDelayMs: 4000 } } } };
 type Props = { anilistId: number; episode: number; audio: "sub" | "dub"; subtitleLanguage: string; initialTime: number; title: string };
 
 export default function VideoPlayer({ anilistId, episode, audio, subtitleLanguage, initialTime, title }: Props) {
@@ -22,17 +22,18 @@ export default function VideoPlayer({ anilistId, episode, audio, subtitleLanguag
   const [retry, setRetry] = useState(0);
   const [waiting, setWaiting] = useState(false);
   const [playing, setPlaying] = useState(false);
+  const [excludedProvider, setExcludedProvider] = useState("");
 
   useEffect(() => {
     const controller = new AbortController();
     console.count("[kumori-player] /api/watch fetch");
     setData(null);
-    fetch(`/api/watch/${anilistId}/${episode}?audio=${audio}&sublang=${encodeURIComponent(subtitleLanguage)}`, { signal: controller.signal })
+    fetch(`/api/watch/${anilistId}/${episode}?audio=${audio}&sublang=${encodeURIComponent(subtitleLanguage)}${excludedProvider ? `&exclude=${encodeURIComponent(excludedProvider)}` : ""}`, { signal: controller.signal })
       .then(async (response) => { const body = await response.json(); if (!response.ok) throw new Error(body.error || "stream_error"); return body; })
       .then((body) => { if (!controller.signal.aborted) { setData(body); setError(""); } })
       .catch((cause) => { if (!controller.signal.aborted) setError(cause.message || "Unable to load stream"); });
     return () => controller.abort();
-  }, [anilistId, episode, audio, subtitleLanguage, retry]);
+  }, [anilistId, episode, audio, subtitleLanguage, retry, excludedProvider]);
 
   useEffect(() => { console.count("[kumori-player] render"); });
   const stream = data?.stream || data?.source || data;
@@ -44,7 +45,7 @@ export default function VideoPlayer({ anilistId, episode, audio, subtitleLanguag
   const persist = () => { const value = progressRef.current; if (value.time > 0) saveProgress(anilistId, { episode, time: value.time, duration: value.duration, audio, title }); };
   useEffect(() => { const hidden = () => { if (document.visibilityState === "hidden") persist(); }; const cleanup = () => persist(); document.addEventListener("visibilitychange", hidden); window.addEventListener("pagehide", cleanup); const timer = window.setInterval(persist, 10000); return () => { window.clearInterval(timer); document.removeEventListener("visibilitychange", hidden); window.removeEventListener("pagehide", cleanup); persist(); }; }, [anilistId, episode, audio, title]);
   const canPlay = () => { if (resumeRef.current || !playerRef.current) return; resumeRef.current = true; const saved = getProgress(anilistId); const time = initialTime || (saved && shouldResume(saved.time, saved.duration) ? saved.time : 0); if (time > 0) playerRef.current.currentTime = time; };
-  const providerChange = (provider: any) => { provider.library = () => import("hls.js"); provider.config = HLS_CONFIG; const hls = provider.instance; if (!hls?.on) return; hls.on("hlsError", (_: string, details: any) => { console.warn("[kumori-hls]", details?.type, details?.details, details?.response?.code); if (!details?.fatal) return; if (details.type === "networkError" && recoveryRef.current.network < 3) { recoveryRef.current.network++; setTimeout(() => hls.startLoad?.(), 1000); return; } if (details.type === "mediaError" && recoveryRef.current.media < 2) { recoveryRef.current.media++; hls.recoverMediaError?.(); return; } if (details.type === "mediaError" && !recoveryRef.current.swapped) { recoveryRef.current.swapped = true; hls.swapAudioCodec?.(); hls.recoverMediaError?.(); return; } if (!recoveryRef.current.switched) { recoveryRef.current.switched = true; setError("stream_recovery_exhausted"); } }); };
+  const providerChange = (provider: any) => { provider.library = () => import("hls.js"); provider.config = HLS_CONFIG; const hls = provider.instance; if (!hls?.on) return; hls.on("hlsError", (_: string, details: any) => { console.warn("[kumori-hls]", details?.type, details?.details, details?.response?.code); if (!details?.fatal) return; if (details.type === "networkError" && recoveryRef.current.network < 3) { recoveryRef.current.network++; setTimeout(() => hls.startLoad?.(), 1000); return; } if (details.type === "mediaError" && recoveryRef.current.media < 2) { recoveryRef.current.media++; hls.recoverMediaError?.(); return; } if (details.type === "mediaError" && !recoveryRef.current.swapped) { recoveryRef.current.swapped = true; hls.swapAudioCodec?.(); hls.recoverMediaError?.(); return; } if (!recoveryRef.current.switched) { recoveryRef.current.switched = true; setExcludedProvider(data?.provider || ""); setRetry((value) => value + 1); return; } setError("stream_recovery_exhausted"); }); };
 
   return <div className={styles.container}><div style={{ position: "relative", aspectRatio: "16 / 9", background: "#000" }}>
     {!data && !error && <img src="/assets/Eclipse-1s-200px-custom-color.svg" alt="Loading video" style={{ position: "absolute", inset: 0, margin: "auto", width: 72, height: 72 }} />}
