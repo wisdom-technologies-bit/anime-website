@@ -105,9 +105,6 @@ export async function removeCookies() {
       `${process.env.NEXT_PUBLIC_WEBSITE_ORIGIN_URL}/api/subtitle`
     );
     await axios.delete(
-      `${process.env.NEXT_PUBLIC_WEBSITE_ORIGIN_URL}/api/wrong-media-enabled`
-    );
-    await axios.delete(
       `${process.env.NEXT_PUBLIC_WEBSITE_ORIGIN_URL}/api/anilist`
     );
   } catch (err) {
