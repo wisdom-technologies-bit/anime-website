@@ -1,0 +1,2 @@
+function pair(a: any, b: any) { const start=Number(a), end=Number(b); return Number.isFinite(start)&&Number.isFinite(end)&&start>=0&&end>start&&start<=10800 ? { start, end } : null; }
+export function normalizeIntroOutro(json: any) { const intro = pair(json?.intro?.start ?? json?.intro_start, json?.intro?.end ?? json?.intro_end); const outro = pair(json?.outro?.start ?? json?.outro_start, json?.outro?.end ?? json?.outro_end); return { intro, outro }; }
