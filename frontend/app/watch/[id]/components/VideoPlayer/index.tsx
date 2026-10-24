@@ -28,6 +28,9 @@ const HLS_CONFIG = {
   backBufferLength: 30,
   enableWorker: true,
   lowLatencyMode: false,
+  enableCEA708Captions: false,
+  enableWebVTT: false,
+  enableIMSC1: false,
   fragLoadPolicy: {
     default: {
       maxTimeToFirstByteMs: 4000,
@@ -147,7 +150,7 @@ export default function VideoPlayer({
         data?.subtitles || [],
         subtitleLanguage.toLowerCase().slice(0, 2),
       ),
-    [sourceId, subtitleLanguage],
+    [sourceId],
   );
   useEffect(() => {
     if (source) console.count(`[kumori-player] src change ${sourceId}`);
@@ -215,7 +218,17 @@ export default function VideoPlayer({
         recoveryRef.current.switched = true;
         const failedProvider = data?.provider || "";
         if (failedProvider) excludedProvidersRef.current.add(failedProvider);
-        void fetch("/api/watch/report", { method: "POST", headers: { "content-type": "application/json" }, body: JSON.stringify({ anilistId, episode, audio, provider: failedProvider, reason: "blocked" }) }).catch(() => undefined);
+        void fetch("/api/watch/report", {
+          method: "POST",
+          headers: { "content-type": "application/json" },
+          body: JSON.stringify({
+            anilistId,
+            episode,
+            audio,
+            provider: failedProvider,
+            reason: "blocked",
+          }),
+        }).catch(() => undefined);
         setExcludedProvider(failedProvider);
         setWaiting(true);
         setRetry((value) => value + 1);
@@ -236,7 +249,17 @@ export default function VideoPlayer({
         recoveryRef.current.switched = true;
         const failedProvider = data?.provider || "";
         if (failedProvider) excludedProvidersRef.current.add(failedProvider);
-        void fetch("/api/watch/report", { method: "POST", headers: { "content-type": "application/json" }, body: JSON.stringify({ anilistId, episode, audio, provider: failedProvider, reason: "blocked" }) }).catch(() => undefined);
+        void fetch("/api/watch/report", {
+          method: "POST",
+          headers: { "content-type": "application/json" },
+          body: JSON.stringify({
+            anilistId,
+            episode,
+            audio,
+            provider: failedProvider,
+            reason: "blocked",
+          }),
+        }).catch(() => undefined);
         setExcludedProvider(failedProvider);
         setWaiting(true);
         setRetry((value) => value + 1);
@@ -313,9 +336,9 @@ export default function VideoPlayer({
             onProviderChange={providerChange}
           >
             <MediaProvider>
-              {tracks.map((track: any) => (
+              {(data?.subtitles ?? []).map((track: any) => (
                 <Track
-                  key={track.id}
+                  key={track.upstreamUrl}
                   src={track.upstreamUrl}
                   kind="subtitles"
                   label={track.label}
@@ -324,7 +347,10 @@ export default function VideoPlayer({
                 />
               ))}
             </MediaProvider>
-            <DefaultVideoLayout icons={defaultLayoutIcons} />
+            <DefaultVideoLayout
+              icons={defaultLayoutIcons}
+              thumbnails={data?.thumbnails?.url}
+            />
           </MediaPlayer>
         )}
         {error && (
