@@ -33,8 +33,32 @@ const mediaFields = `
   popularity
 `;
 
+const mediaListFields = `
+  ${queryTitles}
+  description(asHtml: false)
+  isAdult
+  isFavourite
+  status
+  episodes
+  duration
+  updatedAt
+  favourites
+  averageScore
+  nextAiringEpisode { id episode airingAt }
+  startDate { year month day }
+  season
+  seasonYear
+  id
+  ${queryCoverImage}
+  bannerImage
+  type
+  format
+  genres
+  popularity
+`;
+
 export function requestMedias(otherQueryFields = "", otherMediasFields = "") {
-  return `query($type: MediaType, $format: MediaFormat, $sort: [MediaSort], $season: MediaSeason, $seasonYear: Int, $page: Int, $perPage: Int, $showAdultContent: Boolean, $status: MediaStatus${otherQueryFields}) { Page(page: $page, perPage: $perPage) { media(season: $season, seasonYear: $seasonYear, sort: $sort, type: $type, format: $format, isAdult: $showAdultContent, status: $status${otherMediasFields}) { ${mediaFields} } } }`;
+  return `query($type: MediaType, $format: MediaFormat, $sort: [MediaSort], $season: MediaSeason, $seasonYear: Int, $page: Int, $perPage: Int, $showAdultContent: Boolean, $status: MediaStatus${otherQueryFields}) { Page(page: $page, perPage: $perPage) { media(season: $season, seasonYear: $seasonYear, sort: $sort, type: $type, format: $format, isAdult: $showAdultContent, status: $status${otherMediasFields}) { ${mediaListFields} } } }`;
 }
 
 export function requestMediasByDateRelease() {
