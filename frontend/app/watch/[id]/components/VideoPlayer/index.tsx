@@ -1,10 +1,7 @@
 "use client";
 
 import { useEffect, useMemo, useRef, useState } from "react";
-import { MediaPlayer, MediaProvider, Track } from "@vidstack/react";
-import { DefaultVideoLayout, defaultLayoutIcons } from "@vidstack/react/player/layouts/default";
-import "@vidstack/react/player/styles/default/theme.css";
-import "@vidstack/react/player/styles/default/layouts/video.css";
+import Hls from "hls.js";
 import styles from "./component.module.css";
 import { getProgress, saveProgress, shouldResume } from "@/app/lib/local-store/progress";
 import { normalizeSubtitles } from "@/app/lib/watch/subtitles";
@@ -45,13 +42,46 @@ export default function VideoPlayer({ anilistId, episode, audio, subtitleLanguag
   const persist = () => { const value = progressRef.current; if (value.time > 0) saveProgress(anilistId, { episode, time: value.time, duration: value.duration, audio, title }); };
   useEffect(() => { const hidden = () => { if (document.visibilityState === "hidden") persist(); }; const cleanup = () => persist(); document.addEventListener("visibilitychange", hidden); window.addEventListener("pagehide", cleanup); const timer = window.setInterval(persist, 10000); return () => { window.clearInterval(timer); document.removeEventListener("visibilitychange", hidden); window.removeEventListener("pagehide", cleanup); persist(); }; }, [anilistId, episode, audio, title]);
   const canPlay = () => { if (resumeRef.current || !playerRef.current) return; resumeRef.current = true; const saved = getProgress(anilistId); const time = initialTime || (saved && shouldResume(saved.time, saved.duration) ? saved.time : 0); if (time > 0) playerRef.current.currentTime = time; };
-  const providerChange = (provider: any) => { provider.library = () => import("hls.js"); provider.config = HLS_CONFIG; const hls = provider.instance; if (!hls?.on) return; hls.on("hlsError", (_: string, details: any) => { console.warn("[kumori-hls]", details?.type, details?.details, details?.response?.code); if (!details?.fatal) return; if (details.type === "networkError" && recoveryRef.current.network < 3) { recoveryRef.current.network++; setTimeout(() => hls.startLoad?.(), 1000); return; } if (details.type === "mediaError" && recoveryRef.current.media < 2) { recoveryRef.current.media++; hls.recoverMediaError?.(); return; } if (details.type === "mediaError" && !recoveryRef.current.swapped) { recoveryRef.current.swapped = true; hls.swapAudioCodec?.(); hls.recoverMediaError?.(); return; } if (!recoveryRef.current.switched) { recoveryRef.current.switched = true; setExcludedProvider(data?.provider || ""); setRetry((value) => value + 1); return; } setError("stream_recovery_exhausted"); }); };
+  useEffect(() => {
+    const video = playerRef.current as HTMLVideoElement | null;
+    if (!video || !source) return;
+    let hls: Hls | null = null;
+    const onError = (_event: string, details: any) => {
+      if (!details?.fatal) return;
+      if (details.type === Hls.ErrorTypes.NETWORK_ERROR && recoveryRef.current.network < 3) {
+        recoveryRef.current.network++;
+        hls?.startLoad();
+        return;
+      }
+      if (details.type === Hls.ErrorTypes.MEDIA_ERROR && recoveryRef.current.media < 2) {
+        recoveryRef.current.media++;
+        hls?.recoverMediaError();
+        return;
+      }
+      if (!recoveryRef.current.switched) {
+        recoveryRef.current.switched = true;
+        setExcludedProvider(data?.provider || "");
+        setRetry((value) => value + 1);
+        return;
+      }
+      setError("stream_recovery_exhausted");
+    };
+    if (stream?.type === "mp4" || Hls.isSupported() === false) {
+      video.src = source;
+    } else {
+      hls = new Hls(HLS_CONFIG);
+      hls.on(Hls.Events.ERROR, onError);
+      hls.loadSource(source);
+      hls.attachMedia(video);
+    }
+    return () => { hls?.destroy(); video.pause(); video.removeAttribute("src"); video.load(); };
+  }, [source, sourceId, stream?.type, data?.provider]);
 
   return <div className={styles.container}><div style={{ position: "relative", aspectRatio: "16 / 9", background: "#000" }}>
     {!data && !error && <img src="/assets/Eclipse-1s-200px-custom-color.svg" alt="Loading video" style={{ position: "absolute", inset: 0, margin: "auto", width: 72, height: 72 }} />}
-    {data && source && <MediaPlayer ref={playerRef} key={sourceId} src={{ src: source, type: stream?.type === "mp4" ? "video/mp4" : "application/x-mpegurl" }} title={`Ep. ${episode} - ${title}`} playsInline onCanPlay={canPlay} onTimeUpdate={(event: any) => { progressRef.current.time = event.currentTarget.currentTime; progressRef.current.duration = event.currentTarget.duration || 0; }} onDurationChange={(event: any) => { progressRef.current.duration = event.currentTarget.duration || 0; }} onPlay={() => { setPlaying(true); setWaiting(false); }} onPause={() => { setPlaying(false); persist(); }} onWaiting={() => setWaiting(true)} onStalled={() => setWaiting(true)} onPlaying={() => { setWaiting(false); setPlaying(true); }} onProviderChange={providerChange}>
-      <MediaProvider>{tracks.map((track: any) => <Track key={track.id} src={track.upstreamUrl} kind="subtitles" label={track.label} language={track.lang} default={track.default} />)}</MediaProvider><DefaultVideoLayout icons={defaultLayoutIcons} />
-    </MediaPlayer>}
+    {data && source && <video ref={playerRef} key={sourceId} controls playsInline preload="metadata" title={`Ep. ${episode} - ${title}`} onCanPlay={canPlay} onTimeUpdate={(event) => { progressRef.current.time = event.currentTarget.currentTime; progressRef.current.duration = event.currentTarget.duration || 0; }} onDurationChange={(event) => { progressRef.current.duration = event.currentTarget.duration || 0; }} onPlay={() => { setPlaying(true); setWaiting(false); }} onPause={() => { setPlaying(false); persist(); }} onWaiting={() => setWaiting(true)} onStalled={() => setWaiting(true)} onPlaying={() => { setWaiting(false); setPlaying(true); }}>
+      {tracks.map((track: any) => <track key={track.id} src={track.url || track.upstreamUrl} kind="subtitles" label={track.label} srcLang={track.lang} default={track.default} />)}
+    </video>}
     {error && <div role="alert" style={{ position: "absolute", inset: 0, display: "grid", placeItems: "center", color: "white", background: "#000" }}><div><p>{error}</p><button type="button" onClick={() => setRetry((value) => value + 1)}>Retry</button></div></div>}
     {waiting && <span className="sr-only" role="status">Buffering</span>}
     {!playing && !waiting && data && <span className="sr-only">Paused</span>}
