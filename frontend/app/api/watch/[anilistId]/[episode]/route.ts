@@ -68,7 +68,11 @@ async function resolveProvider(
         probe: probe.segments || null,
         failures: probe.failures || 0,
       });
-      if (probe.ok || (probe.unstable && !candidates.some((candidate: any) => candidate !== stream))) {
+      if (
+        probe.ok ||
+        (probe.unstable &&
+          !candidates.some((candidate: any) => candidate !== stream))
+      ) {
         trace.push({
           provider,
           ms: Date.now() - started,
@@ -150,9 +154,9 @@ export async function GET(
       .maybeSingle());
   }
   if (!row) return json({ error: "episode_not_found" }, 404);
-  const providers = (Array.isArray(row[`${audio}_providers`])
-    ? row[`${audio}_providers`]
-    : []).filter((p: any) => !requestedProvider || p.provider === requestedProvider);
+  const providers = (
+    Array.isArray(row[`${audio}_providers`]) ? row[`${audio}_providers`] : []
+  ).filter((p: any) => !requestedProvider || p.provider === requestedProvider);
   if (!providers.length) {
     const availableAudio = ["sub", "dub"].filter(
       (a) =>
@@ -216,7 +220,12 @@ export async function GET(
     );
   }
   const stream = winner.stream,
-    subs = normalizeSubtitles(stream.subtitles, winner.json.subtitles, sublang),
+    normalized = normalizeSubtitles(
+      stream.subtitles,
+      winner.json.subtitles,
+      sublang,
+    ),
+    subs = normalized.subtitles,
     intro = normalizeIntroOutro(winner.json),
     availableAudio = ["sub", "dub"].filter(
       (a) =>
@@ -231,6 +240,7 @@ export async function GET(
     type: stream.type,
     url: null,
     subtitles: [],
+    thumbnails: null,
     intro: intro.intro,
     outro: intro.outro,
     availableAudio,
@@ -250,6 +260,15 @@ export async function GET(
           ...(stream.type === "mp4" ? { f: "mp4" } : {}),
         },
       );
+      result.thumbnails = normalized.thumbnails
+        ? {
+            url: await proxyUrl("thumbnailvtt", {
+              u: normalized.thumbnails.upstreamUrl,
+              h: winner.headers,
+              f: "vtt",
+            }),
+          }
+        : null;
       result.subtitles = await Promise.all(
         subs.map(async (s: any) => ({
           ...s,

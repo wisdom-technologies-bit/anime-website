@@ -39,8 +39,17 @@ export function normalizeSubtitles(
   preferredLang = "en",
 ) {
   const map = new Map<string, any>();
+  let thumbnails: any = null;
   for (const item of [...streamSubtitles, ...topLevelSubtitles]) {
     if (!item?.url) continue;
+    const source = `${item.label || ""} ${item.kind || ""} ${item.file || ""} ${item.url}`;
+    if (
+      /thumbnail|thumbnails|sprite|storyboard|preview/i.test(source) ||
+      String(item.kind).toLowerCase() === "metadata"
+    ) {
+      thumbnails ||= { upstreamUrl: item.url, format: "vtt" };
+      continue;
+    }
     const format = String(
       item.format || item.url.split(/[?#]/)[0].split(".").pop() || "",
     ).toLowerCase();
@@ -61,26 +70,29 @@ export function normalizeSubtitles(
       Number(b.lang === preferredLang) - Number(a.lang === preferredLang) ||
       Number(a.kind !== "full") - Number(b.kind !== "full"),
   );
-  return items.map((item, i) => {
-    const n = (grouped.get(item.lang) || 0) + 1;
-    grouped.set(item.lang, n);
-    const hint = /sign/i.test(item.rawLabel)
-      ? " (Signs)"
-      : /song/i.test(item.rawLabel)
-        ? " (Songs)"
-        : /forced/i.test(item.rawLabel)
-          ? " (Forced)"
-          : n > 1
-            ? ` (${n})`
-            : "";
-    return {
-      ...item,
-      id: `sub-${i + 1}`,
-      label:
-        (item.lang === preferredLang ? "English" : item.rawLabel) +
-        hint +
-        (n > 1 && !hint ? ` (${n})` : ""),
-      default: i === 0 && item.kind === "full",
-    };
-  });
+  return {
+    subtitles: items.map((item, i) => {
+      const n = (grouped.get(item.lang) || 0) + 1;
+      grouped.set(item.lang, n);
+      const hint = /sign/i.test(item.rawLabel)
+        ? " (Signs)"
+        : /song/i.test(item.rawLabel)
+          ? " (Songs)"
+          : /forced/i.test(item.rawLabel)
+            ? " (Forced)"
+            : n > 1
+              ? ` (${n})`
+              : "";
+      return {
+        ...item,
+        id: `sub-${i + 1}`,
+        label:
+          (item.lang === preferredLang ? "English" : item.rawLabel) +
+          hint +
+          (n > 1 && !hint ? ` (${n})` : ""),
+        default: i === 0 && item.kind === "full",
+      };
+    }),
+    thumbnails,
+  };
 }
