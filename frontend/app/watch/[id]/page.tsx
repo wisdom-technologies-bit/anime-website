@@ -6,6 +6,7 @@ import { getMediaInfo } from "@/app/lib/anilist/medias.server";
 import VideoPlayer from "./components/VideoPlayer";
 import WatchControls from "./components/WatchControls";
 import EpisodesListContainer from "./components/EpisodesListContainer";
+import { WatchState } from "./components/WatchState";
 function clean(s: string | null | undefined) {
   return (s || "").replace(/<[^>]*>/g, "").trim();
 }
@@ -49,44 +50,66 @@ export default async function WatchPage({
   const audio =
     searchParams.audio || (searchParams.dub === "true" ? "dub" : "sub");
   const lang = cookies().get("subtitle_language")?.value || "English";
+  let episodeTitle = `Episode ${ep}`;
+  if (media.format !== "MOVIE") {
+    try {
+      const origin =
+        process.env.NEXT_PUBLIC_SITE_URL || "http://localhost:3000";
+      const response = await fetch(
+        `${origin}/api/anime/${params.id}/episodes`,
+        { signal: AbortSignal.timeout(1500), cache: "no-store" },
+      );
+      const payload = await response.json();
+      episodeTitle =
+        payload.episodes?.find((item: any) => item.number === ep)?.title ||
+        episodeTitle;
+    } catch {}
+  }
   return (
-    <main id={styles.container}>
-      <section className={styles.background}>
-        <div id={styles.video_container}>
-          <VideoPlayer
-            anilistId={Number(params.id)}
-            episode={ep}
-            audio={audio as "sub" | "dub"}
-            subtitleLanguage={lang}
-            initialTime={Number(searchParams.t || 0)}
-            title={media.title.userPreferred}
-          />
-        </div>
-      </section>
-      <WatchControls
-        anilistId={Number(params.id)}
-        episode={ep}
-        audio={audio as "sub" | "dub"}
-      />
-      <section id={styles.media_info_container}>
-        <div id={styles.heading_info_container}>
-          <h1>
-            EP {ep} -{" "}
-            {media.format === "MOVIE"
-              ? media.title.english || media.title.userPreferred
-              : media.title.userPreferred}
-          </h1>
-          <MediaCardExpanded.Container mediaInfo={media as any}>
-            <MediaCardExpanded.Description description={media.description} />
-          </MediaCardExpanded.Container>
-        </div>
-        <EpisodesListContainer
-          mediaId={Number(params.id)}
-          activeEpisodeNumber={ep}
+    <WatchState
+      anilistId={Number(params.id)}
+      episode={ep}
+      initialAudio={audio as "sub" | "dub"}
+      initialSubtitleLanguage={lang}
+    >
+      <main id={styles.container}>
+        <section className={styles.background}>
+          <div id={styles.video_container}>
+            <VideoPlayer
+              anilistId={Number(params.id)}
+              episode={ep}
+              audio={audio as "sub" | "dub"}
+              subtitleLanguage={lang}
+              initialTime={Number(searchParams.t || 0)}
+              title={media.title.userPreferred}
+            />
+          </div>
+        </section>
+        <WatchControls
+          anilistId={Number(params.id)}
+          episode={ep}
           audio={audio as "sub" | "dub"}
-          nextAiringEpisodeInfo={media.nextAiringEpisode || undefined}
         />
-      </section>
-    </main>
+        <section id={styles.media_info_container}>
+          <div id={styles.heading_info_container}>
+            <h1>
+              EP {ep} -{" "}
+              {media.format === "MOVIE"
+                ? media.title.english || media.title.userPreferred
+                : episodeTitle}
+            </h1>
+            <MediaCardExpanded.Container mediaInfo={media as any}>
+              <MediaCardExpanded.Description description={media.description} />
+            </MediaCardExpanded.Container>
+          </div>
+          <EpisodesListContainer
+            mediaId={Number(params.id)}
+            activeEpisodeNumber={ep}
+            audio={audio as "sub" | "dub"}
+            nextAiringEpisodeInfo={media.nextAiringEpisode || undefined}
+          />
+        </section>
+      </main>
+    </WatchState>
   );
 }

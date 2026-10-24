@@ -34,6 +34,7 @@ export default function EpisodesList({
   return (
     <div>
       <button
+        className={styles.order_toggle}
         type="button"
         onClick={() => {
           const next = order === "desc" ? "asc" : "desc";

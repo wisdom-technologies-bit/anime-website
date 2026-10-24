@@ -87,6 +87,21 @@ export default function EpisodesListContainer({
         </div>
       ) : (
         <motion.ol ref={list} id={styles.list_container} data-loading={loading}>
+          {nextAiringEpisodeInfo && order === "desc" && (
+            <li className={styles.next_episode_container}>
+              <div className={styles.img_container}>
+                <span>{nextAiringEpisodeInfo.episode}</span>
+              </div>
+              <div className={styles.episode_info_container}>
+                <small>Next episode</small>
+                {nextAiringEpisodeInfo.airingAt && (
+                  <small>
+                    {convertFromUnix(nextAiringEpisodeInfo.airingAt)}
+                  </small>
+                )}
+              </div>
+            </li>
+          )}
           {loading
             ? Array.from({ length: 5 }, (_, i) => (
                 <li className="item_placeholder" key={i} />
@@ -122,7 +137,7 @@ export default function EpisodesListContainer({
                   </div>
                 </motion.li>
               ))}
-          {nextAiringEpisodeInfo && (
+          {nextAiringEpisodeInfo && order === "asc" && (
             <li className={styles.next_episode_container}>
               <div className={styles.img_container}>
                 <span>{nextAiringEpisodeInfo.episode}</span>
