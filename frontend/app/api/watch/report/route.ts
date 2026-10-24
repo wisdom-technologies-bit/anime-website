@@ -38,18 +38,16 @@ export async function POST(request: Request) {
     const expired =
       !current ||
       now - new Date(current.window_started_at).getTime() >= 1800000;
-    await db
-      .from("provider_health")
-      .upsert({
-        provider: body.provider,
-        ok_count: expired ? 0 : current.ok_count,
-        fail_count: (expired ? 0 : current.fail_count) + 1,
-        window_started_at: expired
-          ? new Date().toISOString()
-          : current.window_started_at,
-        last_fail_at: new Date().toISOString(),
-        last_fail_reason: body.reason,
-      });
+    await db.from("provider_health").upsert({
+      provider: body.provider,
+      ok_count: expired ? 0 : current.ok_count,
+      fail_count: (expired ? 0 : current.fail_count) + 1,
+      window_started_at: expired
+        ? new Date().toISOString()
+        : current.window_started_at,
+      last_fail_at: new Date().toISOString(),
+      last_fail_reason: body.reason,
+    });
     await db
       .from("episodes")
       .update({ resolved_provider: null })

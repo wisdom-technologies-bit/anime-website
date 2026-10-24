@@ -92,20 +92,18 @@ export async function GET(
       recap: range(recap?.startTime, recap?.endTime),
     };
     if (db)
-      await db
-        .from("skip_times")
-        .upsert({
-          anilist_id: id,
-          episode: lookupEpisode,
-          found: Boolean(op || ed || recap),
-          op_start: result.intro?.start ?? null,
-          op_end: result.intro?.end ?? null,
-          ed_start: result.outro?.start ?? null,
-          ed_end: result.outro?.end ?? null,
-          recap_start: result.recap?.start ?? null,
-          recap_end: result.recap?.end ?? null,
-          episode_length: payload.episodeLength ?? null,
-        });
+      await db.from("skip_times").upsert({
+        anilist_id: id,
+        episode: lookupEpisode,
+        found: Boolean(op || ed || recap),
+        op_start: result.intro?.start ?? null,
+        op_end: result.intro?.end ?? null,
+        ed_start: result.outro?.start ?? null,
+        ed_end: result.outro?.end ?? null,
+        recap_start: result.recap?.start ?? null,
+        recap_end: result.recap?.end ?? null,
+        episode_length: payload.episodeLength ?? null,
+      });
     return json(result);
   } catch {
     return json(empty);

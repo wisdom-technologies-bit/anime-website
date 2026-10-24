@@ -31,6 +31,21 @@ export default function WatchControls({
   const [autoSkip, setAutoSkip] = useState(false);
   const [autoNext, setAutoNext] = useState(true);
   const [provider, setProvider] = useState("auto");
+  const [availableServers, setAvailableServers] = useState(servers);
+  const [status, setStatus] = useState("");
+  useEffect(() => {
+    let cancelled = false;
+    fetch(`/api/watch/${anilistId}/${episode}?audio=${audio}`)
+      .then((response) => (response.ok ? response.json() : null))
+      .then((body) => {
+        if (!cancelled && Array.isArray(body?.servers))
+          setAvailableServers(body.servers);
+      })
+      .catch(() => undefined);
+    return () => {
+      cancelled = true;
+    };
+  }, [anilistId, episode, audio]);
   useEffect(() => {
     try {
       setProvider(
@@ -51,9 +66,24 @@ export default function WatchControls({
     } catch {}
     onProviderChange?.(value === "auto" ? "" : value);
   };
-  const next = servers.find(
+  const next = availableServers.find(
     (server) => server.id !== provider && server.healthy,
   );
+  const reportAndChoose = (serverId: string) => {
+    void fetch("/api/watch/report", {
+      method: "POST",
+      headers: { "content-type": "application/json" },
+      body: JSON.stringify({
+        anilistId,
+        episode,
+        audio,
+        provider: provider === "auto" ? serverId : provider,
+        reason: "network",
+      }),
+    }).catch(() => undefined);
+    choose(serverId);
+    setStatus("Switching server...");
+  };
   const setPref = (
     key: string,
     value: boolean,
@@ -124,7 +154,7 @@ export default function WatchControls({
           onChange={(event) => choose(event.target.value)}
         >
           <option value="auto">Auto</option>
-          {servers.map((server) => (
+          {availableServers.map((server) => (
             <option key={server.id} value={server.id}>
               {server.label}
               {server.type === "embed" ? " (embed)" : ""}
@@ -156,10 +186,17 @@ export default function WatchControls({
       <button
         type="button"
         disabled={!next}
-        onClick={() => next && choose(next.id)}
+        onClick={() => next && reportAndChoose(next.id)}
       >
         Try next server
       </button>
+      <small>
+        {status ||
+          (provider === "auto"
+            ? "Auto"
+            : availableServers.find((server) => server.id === provider)
+                ?.label || provider)}
+      </small>
     </div>
   );
 }

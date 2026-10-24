@@ -21,9 +21,12 @@ export function mergeSkipRanges(
   aniskipRanges: Partial<SkipRanges> = {},
 ): SkipRanges {
   return {
-    intro: valid(providerRanges.intro ?? null) || valid(aniskipRanges.intro ?? null),
-    outro: valid(providerRanges.outro ?? null) || valid(aniskipRanges.outro ?? null),
-    recap: valid(providerRanges.recap ?? null) || valid(aniskipRanges.recap ?? null),
+    intro:
+      valid(providerRanges.intro ?? null) || valid(aniskipRanges.intro ?? null),
+    outro:
+      valid(providerRanges.outro ?? null) || valid(aniskipRanges.outro ?? null),
+    recap:
+      valid(providerRanges.recap ?? null) || valid(aniskipRanges.recap ?? null),
   };
 }
 

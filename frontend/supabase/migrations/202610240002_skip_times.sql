@@ -13,4 +13,9 @@ create table if not exists public.skip_times (
   primary key (anilist_id, episode)
 );
 alter table public.skip_times enable row level security;
+
+create policy "skip_times_public_read" on public.skip_times
+  for select to anon, authenticated using (true);
+revoke insert, update, delete on public.skip_times from anon, authenticated;
+
 create policy "skip times are publicly readable" on public.skip_times for select to anon, authenticated using (true);

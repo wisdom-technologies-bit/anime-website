@@ -7,3 +7,6 @@ create table if not exists public.provider_health (
   last_fail_reason text
 );
 alter table public.provider_health enable row level security;
+
+revoke all on public.provider_health from anon, authenticated;
+

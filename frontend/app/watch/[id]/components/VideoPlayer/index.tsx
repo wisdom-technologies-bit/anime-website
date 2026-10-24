@@ -15,6 +15,7 @@ import {
   shouldResume,
 } from "@/app/lib/local-store/progress";
 import { normalizeSubtitles } from "@/app/lib/watch/subtitles";
+import { isSkipVisible } from "@/app/lib/watch/skip";
 
 const HLS_CONFIG = {
   autoStartLoad: true,
@@ -88,10 +89,18 @@ export default function VideoPlayer({
   const [waiting, setWaiting] = useState(false);
   const [playing, setPlaying] = useState(false);
   const [excludedProvider, setExcludedProvider] = useState("");
+  const [skipRanges, setSkipRanges] = useState<any>(null);
+  const [visibleSkip, setVisibleSkip] = useState<any>(null);
 
   useEffect(() => {
     const controller = new AbortController();
     console.count("[kumori-player] /api/watch fetch");
+    fetch(`/api/skip/${anilistId}/${episode}`)
+      .then((response) => (response.ok ? response.json() : null))
+      .then((body) => {
+        if (!controller.signal.aborted) setSkipRanges(body);
+      })
+      .catch(() => undefined);
     setData(null);
     fetch(
       `/api/watch/${anilistId}/${episode}?audio=${audio}&sublang=${encodeURIComponent(subtitleLanguage)}${excludedProvider ? `&exclude=${encodeURIComponent(excludedProvider)}` : ""}${provider ? `&provider=${encodeURIComponent(provider)}` : ""}`,
@@ -105,6 +114,7 @@ export default function VideoPlayer({
       .then((body) => {
         if (!controller.signal.aborted) {
           setData(body);
+          onResolved?.(body);
           setError("");
         }
       })
@@ -113,7 +123,15 @@ export default function VideoPlayer({
           setError(cause.message || "Unable to load stream");
       });
     return () => controller.abort();
-  }, [anilistId, episode, audio, subtitleLanguage, retry, excludedProvider]);
+  }, [
+    anilistId,
+    episode,
+    audio,
+    subtitleLanguage,
+    retry,
+    excludedProvider,
+    provider,
+  ]);
 
   useEffect(() => {
     console.count("[kumori-player] render");
@@ -260,6 +278,11 @@ export default function VideoPlayer({
             onTimeUpdate={(event: any) => {
               progressRef.current.time = event.currentTarget.currentTime;
               progressRef.current.duration = event.currentTarget.duration || 0;
+              const current = event.currentTarget.currentTime;
+              const range = ["intro", "recap", "outro"]
+                .map((key) => ({ key, range: skipRanges?.[key] }))
+                .find((item) => isSkipVisible(current, item.range));
+              setVisibleSkip(range || null);
             }}
             onDurationChange={(event: any) => {
               progressRef.current.duration = event.currentTarget.duration || 0;
@@ -317,6 +340,24 @@ export default function VideoPlayer({
               </button>
             </div>
           </div>
+        )}
+        {visibleSkip && (
+          <button
+            type="button"
+            onClick={() => {
+              if (playerRef.current && visibleSkip.range)
+                playerRef.current.currentTime = visibleSkip.range.end;
+              setVisibleSkip(null);
+            }}
+            style={{ position: "absolute", right: 16, bottom: 64, zIndex: 2 }}
+          >
+            Skip{" "}
+            {visibleSkip.key === "intro"
+              ? "Intro"
+              : visibleSkip.key === "recap"
+                ? "Recap"
+                : "Ending"}
+          </button>
         )}
         {waiting && (
           <span className="sr-only" role="status">
